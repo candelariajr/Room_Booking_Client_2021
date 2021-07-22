@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<div id="appContainer" class="screen">
+    <div id="mainContainer">
+        <div id="mainTopSection">
+            <div id="leftColorBar" class="available"></div>
+            <div id="rightInfoScreen">
+                <div id="timeContainer">10:39 AM</div>
+                <div id="locationContainer">Room 357B</div>
+                <div id="statusContainer">Available</div>
+            </div>
+        </div>
+        <div id="reserveContainer">
+            <div id="reserveButton">Reserve</div>
+        </div>
+        <div id="currentDateContainer">6/11/2021</div>
+        <div id="nextAvailableContainer">Next: Bananas</div>
+    </div>
+    <div id="rightRibbon" class="available"></div>
+    <div id="bookingSlots">
+        <div class="bookingSlot available">3:30</div>
+        <div class="bookingSlot available">4:00</div>
+        <div class="bookingSlot unavailable">4:30</div>
+        <div class="bookingSlot available" >5:00</div>
+        <div class="bookingSlot available">12:00</div>
+        <div class="bookingSlot unavailable">1:00</div>
+        <div class="bookingSlot available">1:30</div>
+        <div class="bookingSlot unavailable">2:00</div>
+    </div>
+</div>
+<div id="confirmationModal" class="modal">
+    <div id="confirmationTop"></div>
+    <div id="confirmationBottom">
+        <div id="confirmationButton">Book Now</div>
+        <div id="cancelConfirmationButton"></div>
+    </div>
+</div>
+<div id="resultModal" class="modal">
+    <div id="resultTop"></div>
+    <div id="resultBottom">
+        <div id="resultCloseButton"></div>
+    </div>
+</div>
+<div id="instructionScreen" class="screen"></div>
+<script src="scripts/app.js"></script>
+</body>
+</html>
