@@ -331,9 +331,8 @@ function makeAjaxCall(){
 //Start main application and attach event listeners
 (()=>{
     let mainLoop = setInterval(function(){
-
+        if(!interactionState.isInteracting()){
+            makeAjaxCall();
+        }
     }, config['GET_STATE_INTERVAL'])
-    if(!interactionState.isInteracting()){
-        makeAjaxCall();
-    }
 })()
