@@ -6,6 +6,9 @@ GLOBAL
 
 *{
     font-family: Arial, Verdana, sans-serif;
+    user-select: none;
+    /*TODO: Remove this line below for production. The cursor must not be seen*/
+    cursor: pointer;
 }
 
 /* RESET */
