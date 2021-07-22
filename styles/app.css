@@ -1,0 +1,183 @@
+/**
+------------------------------------------------------------------
+GLOBAL
+------------------------------------------------------------------
+ */
+
+*{
+    font-family: Arial, Verdana, sans-serif;
+}
+
+/* RESET */
+div{
+    border: 0;
+    margin: 0;
+    color: white;
+    background-color: #111;
+}
+
+body{
+    background-color: #444;
+    margin: 0;
+}
+
+.screen{
+    height: 480px;
+    width: 800px;
+}
+
+.modal{}
+
+/* Universal */
+/* Available */
+.available{
+    background-color: #39F57F;
+}
+
+/* Unavailable */
+.unavailable{
+    background-color: red;
+}
+
+.selected{
+    background-color: #444444;
+}
+
+/**
+------------------------------------------------------------------
+INITIAL SCREEN
+------------------------------------------------------------------
+ */
+#appContainer{}
+
+#mainContainer{
+    width: 790px;
+    height: 380px;
+    display: inline-block;
+    float: left;
+}
+
+#mainTopSection{
+    height: 250px;
+    background-color: #444444;
+}
+
+#leftColorBar{
+    width: 50px;
+    height: 100%;
+    display: inline-block;
+    float:left;
+}
+
+#rightInfoScreen{
+    display: inline-block;
+    float:left;
+    width:700px;
+    height:220px;
+    padding-left:40px;
+    padding-top:30px;
+}
+
+#timeContainer{
+    font-size: 25px;
+    padding-bottom: 20px;
+}
+
+#locationContainer{
+    font-size: 70px;
+    padding-bottom: 15px;
+}
+
+#statusContainer{
+    font-size: 35px;
+}
+
+#reserveContainer{
+    height: 65px;
+    padding-left: 20px;
+    padding-top: 15px;
+}
+
+#reserveButton{
+    font-size: 20px;
+    background: #222;
+    width: 200px;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+#currentDateContainer{
+    height: 30px;
+    padding-left:30px;
+}
+
+#nextAvailableContainer{
+    color: turquoise;
+    font-weight:bold;
+    padding-left:30px;
+    height: 20px;
+    background: #222222;
+    padding-top: 2px;
+}
+
+#bookingSlots{
+    height:100px;
+}
+
+.bookingSlot{
+    display: inline-block;
+    width: 97px;
+    height: 65px;
+    float:left;
+    padding-top:25px;
+    horiz-align: center;
+    font-size: 30px;
+    border-right: 3px solid #444444;
+    text-align:center;
+}
+
+.bookingSlot.available{
+    background-color: #111111;
+    border-bottom: 10px solid #39F57F;
+}
+
+.bookingSlot.unavailable{
+    background-color: #111111;
+    border-bottom: 10px solid red;
+}
+
+#rightRibbon{
+    display: inline-block;
+    width: 10px;
+    height:380px;
+    float:left;
+}
+
+/**
+------------------------------------------------------------------
+CONFIRMATION MODAL
+------------------------------------------------------------------
+ */
+#confirmationModal{
+    display:none;
+}
+/**
+------------------------------------------------------------------
+RESULT MODAL
+------------------------------------------------------------------
+ */
+#resultModal{
+    display:none;
+}
+/**
+------------------------------------------------------------------
+INSTRUCTION SCREEN
+------------------------------------------------------------------
+ */
+#instructionScreen{
+    display:none;
+}
+
