@@ -8,7 +8,15 @@ let state = {
 const config = {
     SERVER_SCRIPT_URL : "http://localhost/Room_Booking_Web_Server/room_booking.php",
     GET_STATE_INTERVAL: 10000,
-    RELOAD_TIME: "3:00:00AM"
+    RELOAD_TIME: "3:00:00AM",
+    //Note: Only one screen can be rendered at one time
+    SCREENS: [
+      "appContainer", "instructionScreen"
+    ],
+    //Note: Only 1 screen and 1 modal can be rendered at once
+    MODALS: [
+        "confirmationModal", "resultModal", "errorModal"
+    ]
 };
 
 /**
@@ -69,7 +77,7 @@ const config = {
             + month[day.getMonth()]
             + " "
             + day.getDate();
-        state["date"] = (day.getMonth() + 1) + "/" + (day.getMonth() + 1) + "/" + day.getFullYear();
+        state["date"] = (day.getMonth() + 1) + "/" + day.getDate() + "/" + day.getFullYear();
         renderTime("timeContainer");
         const clockString = hour + ":" + minute + ":" + second + amPm;
         if(clockString === config['RELOAD_TIME']){
@@ -96,41 +104,140 @@ const interactionState = {
      */
 }
 
-const slots = [
+let bottomButtons = [
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null,
         pageLeft: false
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null},
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null
     },
     {
         time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
         availability: null,
         pageRight: false
     },
 ]
+
+/**
+ * Pull the display times for the slots to be displayed at the bottom row and assign them to
+ * bottomButton objects.
+ * This is called when data is received from the server.
+ * NOTE: This is the new getEight function
+ */
+function getDisplayTimesToButtonObject(){
+    if(!state['reply']){
+        error("No Local Data Available");
+        return;
+    }
+    //There are at least 8 slots here
+    if(state['reply']['days'][0]['time-slots'].length >= 8){
+        console.log("Number of slots today: " + state['reply']['days'][0]['time-slots'].length);
+        for(let i = 0; i < 8; i++) {
+            setSlotData(0, i)
+        }
+        console.log(bottomButtons);
+    }else{
+        //pick up the last slots of the current day and the ones from the next day for a total of 8
+        let firstDaySlotCount = state['reply']['days'][0]['time-slots'].length;
+        let secondDaySlotCount = 8 - firstDaySlotCount;
+        let  buttonSlotPosition = 0;
+        //TODO: Audit this as there is probably an off by 1 error in here somewhere.
+        for(let i = 0; i < firstDaySlotCount; i++){
+            setSlotData(0, i);
+            buttonSlotPosition++;
+        }
+        for(let i = 0; i < secondDaySlotCount; i++){
+            setSlotData(1, buttonSlotPosition);
+            buttonSlotPosition++;
+        }
+    }
+    renderSlots();
+}
+
+/**
+ * Support function for getDisplayTimesToButtonObject()
+ * Called by loops to tell which server data goes into the global slots properties.
+ * @param serverDataDay
+ * The given day within the server data object (it gets today and tomorrow for late night
+ * transition between days)
+ * @param slotArrayIndex
+ * This is the position in the array to put the server time info into
+ */
+function setSlotData(serverDataDay, slotArrayIndex){
+    console.log("SetSlotData");
+    let slot = state['reply']['days'][serverDataDay]['time-slots'][slotArrayIndex];
+    bottomButtons[slotArrayIndex]['time'] = slot['from-display'].split(" ")[0];
+    bottomButtons[slotArrayIndex]['ISOBeginTime'] = slot['from-iso'];
+    bottomButtons[slotArrayIndex]['ISOEndTime'] = slot['to-iso'];
+    bottomButtons[slotArrayIndex]['availability'] = slot['status'];
+}
+
+
+/**
+ * Render the slots based on the contents of the bottomButton objects.
+ */
+function renderSlots(){
+    for(let i= 0; i < 8; i++){
+        let element = document.getElementById("s" + i)
+        if(bottomButtons[i]['availability'] &&
+            //Redundant, but error checking kept flagging this one
+            typeof bottomButtons[i]['availability'] === 'string' &&
+            bottomButtons[i]['availability'].toString() === 'available'){
+            element.innerHTML = bottomButtons[i]['time'];
+            element.className = "bookingSlot available";
+        }else{
+            element.innerHTML = bottomButtons[i]['time'];
+            element.className = "bookingSlot unavailable";
+        }
+    }
+}
+
+/**
+ * Event that takes an argument based on event listener assignment
+ * @param i
+ */
+function bottomButton(i){
+    interactionState.interact();
+    renderSlots();
+}
 
 
 /**
@@ -149,6 +256,16 @@ window.oncontextmenu = function(e){
 function renderTime(timeContainerElement){
     document.getElementById(timeContainerElement).innerHTML = state['time'];
     //rendering Date as well
+    document.getElementById("currentDateContainer").innerHTML = state['date'];
+}
+
+/**
+ * Renders Error modal to screen with message
+ * @param message
+ */
+function error(message){
+    //TODO: Implement Modal
+    console.log(message);
 }
 
 /**
@@ -217,7 +334,10 @@ function getTimeSlotDisplay(serverDisplayFormat){
  * the JSON response from the server with the state and slot info
  */
 function populateSlots(serverReply){
+    //snap Server reply to Global State
     state['reply'] = serverReply;
+    //render the big display colors (Color Bar and Ribbon)
+    //render the text (avail, room number)
     document.getElementById("locationContainer").innerHTML = serverReply["room-display-text"]
     if(serverReply["available"]){
         //Text
@@ -238,7 +358,7 @@ function populateSlots(serverReply){
         document.getElementById("rightRibbon").classList.remove('available');
         document.getElementById("rightRibbon").classList.add('unavailable');
     }
-
+    getDisplayTimesToButtonObject();
 }
 
 /**
@@ -246,13 +366,6 @@ function populateSlots(serverReply){
  * If it is a positive page screen
  */
 function select(){
-
-}
-
-/**
- * called to get availability, populate state object, render the screen, adjust CSS accordingly
- */
-function getAvailabilty(){
 
 }
 
@@ -334,5 +447,5 @@ function makeAjaxCall(){
         if(!interactionState.isInteracting()){
             makeAjaxCall();
         }
-    }, config['GET_STATE_INTERVAL'])
+    }, config['GET_STATE_INTERVAL']);
 })()
