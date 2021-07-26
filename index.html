@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Room Booking Web Client</title>
     <link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
@@ -20,18 +20,18 @@
             <div id="reserveButton">Reserve</div>
         </div>
         <div id="currentDateContainer">6/11/2021</div>
-        <div id="nextAvailableContainer">Next: Bananas</div>
+        <div id="nextAvailableContainer">Bananas</div>
     </div>
     <div id="rightRibbon" class="available"></div>
     <div id="bookingSlots">
-        <div class="bookingSlot available">3:30</div>
-        <div class="bookingSlot available">4:00</div>
-        <div class="bookingSlot unavailable">4:30</div>
-        <div class="bookingSlot available" >5:00</div>
-        <div class="bookingSlot available">12:00</div>
-        <div class="bookingSlot unavailable">1:00</div>
-        <div class="bookingSlot available">1:30</div>
-        <div class="bookingSlot unavailable">2:00</div>
+        <div id="s0" class="bookingSlot available">3:30</div>
+        <div id="s1" class="bookingSlot available">4:00</div>
+        <div id="s2" class="bookingSlot unavailable">4:30</div>
+        <div id="s3" class="bookingSlot available" >5:00</div>
+        <div id="s4" class="bookingSlot available">12:00</div>
+        <div id="s5" class="bookingSlot unavailable">1:00</div>
+        <div id="s6" class="bookingSlot available">1:30</div>
+        <div id="s7" class="bookingSlot unavailable">2:00</div>
     </div>
 </div>
 <div id="confirmationModal" class="modal">
@@ -44,7 +44,14 @@
 <div id="resultModal" class="modal">
     <div id="resultTop"></div>
     <div id="resultBottom">
-        <div id="resultCloseButton"></div>
+        <div id="resultCloseButton" class="close-modal">Close</div>
+    </div>
+</div>
+<div id="errorModal" class="modal">
+    <div id="errorTop">
+        <div id="errorBottom">
+            <div id="errorClose" class="close-modal">Close</div>
+        </div>
     </div>
 </div>
 <div id="instructionScreen" class="screen"></div>
