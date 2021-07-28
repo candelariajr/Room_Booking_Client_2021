@@ -1,8 +1,11 @@
 // Declaration of global state object
 let state = {
+    anySlotAvailable: false,
+    startup: false,
     currentIndex: 0,
     availability: null,
-    reserveButtonActive: false
+    reserveButtonActive: false,
+    selectedSlots: []
 };
 // Declaration of global config object used for display text
 const config = {
@@ -16,7 +19,14 @@ const config = {
     //Note: Only 1 screen and 1 modal can be rendered at once
     MODALS: [
         "confirmationModal", "resultModal", "errorModal"
-    ]
+    ],
+    //They tell me not to do this, but I KNOW that we'll need it. Keeping it. Just making it lest noticeable
+    //before changing it during implementation.
+    //One Hour
+    //INTERACTION_TIMEOUT: 3600000
+    INTERACTION_TIMEOUT: 300000,
+    FIRST_INSTRUCTION_TEXT: "Tap a Slot to Start",
+    UNABLE_TO_LOAD_DATA: "No Local Data Available"
 };
 
 /**
@@ -91,17 +101,25 @@ const interactionState = {
     state: false,
     interact: function(){
         this.state = true;
+        clearTimeout(this.timeout);
+        this.timeout = null;
+        this.timeout = setTimeout(function(){
+            interactionState.endInteraction();
+        }, config.INTERACTION_TIMEOUT)
     },
     isInteracting: function(){
         return this.state
     },
     endInteraction: function(){
+        clearTimeout(this.timeout);
+        this.timeout = null;
         this.state = false;
-    }
-    /**
-     * This is normally supposed to have a timeout but they're like "NOOOOO"
-     * They'll freaking ask me to put it in anyway, but whatever
-     */
+        state.reserveButtonActive = false;
+        bottomButtons[state.selectedSlot]['selected'] = false;
+        state.selectedSlot = null;
+        renderSlots();
+    },
+    timeout: null
 }
 
 let bottomButtons = [
@@ -110,49 +128,51 @@ let bottomButtons = [
         ISOBeginTime : null,
         ISOEndTime: null,
         availability: null,
-        pageLeft: false
-    },
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null
-    },
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null},
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null
-    },
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null
-    },
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null
-    },
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null
-    },
-    {
+        pageLeft: false,
+        selected: false
+    },{
         time: null,
         ISOBeginTime : null,
         ISOEndTime: null,
         availability: null,
-        pageRight: false
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        selected: false
+    },{
+        time: null,
+        ISOBeginTime : null,
+        ISOEndTime: null,
+        availability: null,
+        pageRight: false,
+        selected: false
     },
 ]
 
@@ -164,16 +184,14 @@ let bottomButtons = [
  */
 function getDisplayTimesToButtonObject(){
     if(!state['reply']){
-        error("No Local Data Available");
+        error(config.UNABLE_TO_LOAD_DATA);
         return;
     }
     //There are at least 8 slots here
     if(state['reply']['days'][0]['time-slots'].length >= 8){
-        console.log("Number of slots today: " + state['reply']['days'][0]['time-slots'].length);
         for(let i = 0; i < 8; i++) {
-            setSlotData(0, i)
+            setSlotData(0, i, i)
         }
-        console.log(bottomButtons);
     }else{
         //pick up the last slots of the current day and the ones from the next day for a total of 8
         let firstDaySlotCount = state['reply']['days'][0]['time-slots'].length;
@@ -181,11 +199,11 @@ function getDisplayTimesToButtonObject(){
         let  buttonSlotPosition = 0;
         //TODO: Audit this as there is probably an off by 1 error in here somewhere.
         for(let i = 0; i < firstDaySlotCount; i++){
-            setSlotData(0, i);
+            setSlotData(0, i, i);
             buttonSlotPosition++;
         }
         for(let i = 0; i < secondDaySlotCount; i++){
-            setSlotData(1, buttonSlotPosition);
+            setSlotData(1, i, buttonSlotPosition)
             buttonSlotPosition++;
         }
     }
@@ -198,12 +216,13 @@ function getDisplayTimesToButtonObject(){
  * @param serverDataDay
  * The given day within the server data object (it gets today and tomorrow for late night
  * transition between days)
+ * @param serverSlotIndex
+ * Index of the server day to put into the given slot index
  * @param slotArrayIndex
- * This is the position in the array to put the server time info into
+ * The slot index the server data goes into
  */
-function setSlotData(serverDataDay, slotArrayIndex){
-    console.log("SetSlotData");
-    let slot = state['reply']['days'][serverDataDay]['time-slots'][slotArrayIndex];
+function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
+    let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
     bottomButtons[slotArrayIndex]['time'] = slot['from-display'].split(" ")[0];
     bottomButtons[slotArrayIndex]['ISOBeginTime'] = slot['from-iso'];
     bottomButtons[slotArrayIndex]['ISOEndTime'] = slot['to-iso'];
@@ -215,27 +234,63 @@ function setSlotData(serverDataDay, slotArrayIndex){
  * Render the slots based on the contents of the bottomButton objects.
  */
 function renderSlots(){
+    state.anySlotAvailable = false;
     for(let i= 0; i < 8; i++){
         let element = document.getElementById("s" + i)
         if(bottomButtons[i]['availability'] &&
             //Redundant, but error checking kept flagging this one
             typeof bottomButtons[i]['availability'] === 'string' &&
             bottomButtons[i]['availability'].toString() === 'available'){
+            state.anySlotAvailable = true;
             element.innerHTML = bottomButtons[i]['time'];
             element.className = "bookingSlot available";
         }else{
             element.innerHTML = bottomButtons[i]['time'];
             element.className = "bookingSlot unavailable";
         }
+        if(bottomButtons[i]['selected']){
+            state.anySlotAvailable = true;
+            element.className = "bookingSlot selected";
+        }
+    }
+    if(state.reserveButtonActive){
+        document.getElementById("reserveButton").className="reserve-active";
+    }else{
+        document.getElementById("reserveButton").className="reserve-inactive";
+    }
+    if(!state.anySlotAvailable){
+        document.getElementById("firstInstruction").innerHTML = "";
+    }else{
+        document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
     }
 }
 
 /**
  * Event that takes an argument based on event listener assignment
+ * This is called whenever any of the bottom buttons is pressed
  * @param i
  */
 function bottomButton(i){
     interactionState.interact();
+    //if slot is available
+    if(bottomButtons[i]['availability'] === 'available'){
+        //if nothing else is selected
+        if(!state.reserveButtonActive){
+            bottomButtons[i]['selected'] = true;
+            state.selectedSlots[0] = i;
+            state.reserveButtonActive = true;
+        //if slot is already selected
+        }else if(i === state.selectedSlots[0]){
+            bottomButtons[i]['selected'] = false;
+            state.selectedSlots[0] = null;
+            state.reserveButtonActive = false;
+        //if different slot is selected
+        }else{
+            bottomButtons[state.selectedSlots[0]]['selected'] = false;
+            bottomButtons[i]['selected'] = true;
+            state.selectedSlots[0] = i;
+        }
+    }
     renderSlots();
 }
 
@@ -271,6 +326,8 @@ function error(message){
 /**
  * @param element
  * Plain text name of element of modal that is to be rendered
+ * A Model rendering is just displaying it to the screen. Different Modals have
+ * different functions so a template doesn't work.
  */
 function renderModal(element){
 
@@ -301,22 +358,6 @@ function closeScreen(element){
 }
 
 /**
- * Right page tap
- * If it's a slot, render the confirmation
- * If not, then move the screen forward
- */
-function rightmost(){
-
-}
-
-/**
- * Page Left Action
- */
-function leftmost(){
-
-}
-
-/**
  * Trim the availability string for display
  * @param serverDisplayFormat
  * The from/to-display from the server
@@ -326,6 +367,17 @@ function leftmost(){
 function getTimeSlotDisplay(serverDisplayFormat){
     return "";
 }
+
+/**
+ * Added listener for reserve button
+ * If something is selected and this button is active, render confirmation window
+ */
+function makeReservation(){
+    if(state.reserveButtonActive){
+        console.log("reserve SOMETHING");
+    }
+}
+
 
 /**
  * Populate the slots
@@ -423,6 +475,10 @@ function processKey(e){
  * Function to get the data from the server and send it to the populate function
  */
 function makeAjaxCall(){
+    if(!state.startup){
+        document.getElementById("locationContainer").innerHTML = "Getting New Data...";
+        state.startup = true;
+    }
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function(){
         if(this.readyState === 4){
@@ -448,4 +504,12 @@ function makeAjaxCall(){
             makeAjaxCall();
         }
     }, config['GET_STATE_INTERVAL']);
+    for(let i = 0; i < 8; i++){
+        document.getElementById("s" + i).addEventListener('click', function(){
+            bottomButton(i);
+        });
+    }
+    document.getElementById("reserveButton").addEventListener('click', function(){
+        makeReservation();
+    });
 })()
