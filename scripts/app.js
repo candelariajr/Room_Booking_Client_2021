@@ -7,6 +7,7 @@ let state = {
     reserveButtonActive: false,
     selectedSlots: []
 };
+
 // Declaration of global config object used for display text
 const config = {
     SERVER_SCRIPT_URL : "http://localhost/Room_Booking_Web_Server/room_booking.php",
@@ -24,9 +25,11 @@ const config = {
     //before changing it during implementation.
     //One Hour
     //INTERACTION_TIMEOUT: 3600000
+    // 5 minutes
     INTERACTION_TIMEOUT: 300000,
     FIRST_INSTRUCTION_TEXT: "Tap a Slot to Start",
-    UNABLE_TO_LOAD_DATA: "No Local Data Available"
+    UNABLE_TO_LOAD_DATA: "No Local Data Available",
+    TAP_RESERVE: "Tap 'Reserve' to Continue"
 };
 
 /**
@@ -96,7 +99,10 @@ const config = {
     }, 1000);
 })();
 
-
+/**
+ * Interaction model.
+ * @type {{endInteraction: interactionState.endInteraction, interact: interactionState.interact, state: boolean, isInteracting: (function(): boolean), timeout: null}}
+ */
 const interactionState = {
     state: false,
     interact: function(){
@@ -122,6 +128,13 @@ const interactionState = {
     timeout: null
 }
 
+/**
+ * Model of the bottom row of buttons. This governs their actions on click
+ * @type {[{pageLeft: boolean, ISOBeginTime: null, ISOEndTime: null, time: null, availability: null, selected: boolean}, {ISOBeginTime: null, ISOEndTime: null, time: null, availability: null, selected: boolean}, {ISOBeginTime: null, ISOEndTime: null, time: null, availability: null, selected: boolean}, {ISOBeginTime: null, ISOEndTime: null, time: null, availability: null, selected: boolean}, {ISOBeginTime: null, ISOEndTime: null, time: null, availability: null, selected: boolean}, null, null, null]}
+ * @time: display time
+ * @ISOBeginTime: ISO format of start of booking slot
+ * @ISOEndTIme: ISO format of end time of booking slot (ISO times are needed by the API).
+ */
 let bottomButtons = [
     {
         time: null,
@@ -235,35 +248,48 @@ function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
  */
 function renderSlots(){
     state.anySlotAvailable = false;
-    for(let i= 0; i < 8; i++){
+    for(let i= 0; i < 8; i++) {
         let element = document.getElementById("s" + i)
-        if(bottomButtons[i]['availability'] &&
+        if (bottomButtons[i]['availability'] &&
             //Redundant, but error checking kept flagging this one
             typeof bottomButtons[i]['availability'] === 'string' &&
-            bottomButtons[i]['availability'].toString() === 'available'){
+            bottomButtons[i]['availability'].toString() === 'available') {
             state.anySlotAvailable = true;
             element.innerHTML = bottomButtons[i]['time'];
             element.className = "bookingSlot available";
-        }else{
+        } else {
             element.innerHTML = bottomButtons[i]['time'];
             element.className = "bookingSlot unavailable";
         }
-        if(bottomButtons[i]['selected']){
+        if (bottomButtons[i]['selected']) {
             state.anySlotAvailable = true;
             element.className = "bookingSlot selected";
         }
     }
-    if(state.reserveButtonActive){
-        document.getElementById("reserveButton").className="reserve-active";
-    }else{
-        document.getElementById("reserveButton").className="reserve-inactive";
-    }
+    //TODO: Clean up some of this logic
     if(!state.anySlotAvailable){
         document.getElementById("firstInstruction").innerHTML = "";
     }else{
         document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
     }
+    if(state.reserveButtonActive){
+        document.getElementById("reserveButton").className = "reserve-active";
+        document.getElementById("firstInstruction").innerHTML = config.TAP_RESERVE;
+    }else{
+        document.getElementById("reserveButton").className="reserve-inactive";
+        document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
+    }
+    cleanup();
 }
+
+/**
+ * Support function for renderSlots and possibly others in the future
+ * This resets all modals, resets all state parameters, and clears up any remaining old data from the screen
+ */
+function cleanup(){
+
+}
+
 
 /**
  * Event that takes an argument based on event listener assignment
@@ -293,7 +319,6 @@ function bottomButton(i){
     }
     renderSlots();
 }
-
 
 /**
  * Override default mouse functions to prevent press-hold right click.
@@ -330,15 +355,30 @@ function error(message){
  * different functions so a template doesn't work.
  */
 function renderModal(element){
-
+    for(let i = 0; i < config.MODALS.length; i++){
+        if(element === config.MODALS[i]){
+            document.getElementById(config.MODALS[i]).style.display = "block";
+        }else{
+            document.getElementById(config.MODALS[i]).style.display = "none";
+        }
+    }
+    for(let i = 0; i < config.SCREENS.length; i++){
+        //make all screens opaque
+        document.getElementById(config.SCREENS[i]).className = "screen opaque";
+    }
 }
 
 /**
- * @param element
- * Plain text name of element of the modal that is to be closed
+ * Close modal: Close all modals and remove opacity filter
  */
-function closeModal(element){
-
+function closeModal(){
+    for(let i = 0; i < config.MODALS.length; i++){
+        document.getElementById(config.MODALS[i]).style.display = "none";
+    }
+    for(let i = 0; i < config.SCREENS.length; i++){
+        //make all screens clear (but NOT displayed)
+        document.getElementById(config.SCREENS[i]).className = "screen";
+    }
 }
 
 /**
@@ -375,9 +415,9 @@ function getTimeSlotDisplay(serverDisplayFormat){
 function makeReservation(){
     if(state.reserveButtonActive){
         console.log("reserve SOMETHING");
+        renderModal("confirmationModal");
     }
 }
-
 
 /**
  * Populate the slots
@@ -499,17 +539,24 @@ function makeAjaxCall(){
 
 //Start main application and attach event listeners
 (()=>{
+    // declare main loop that's always running
     let mainLoop = setInterval(function(){
         if(!interactionState.isInteracting()){
             makeAjaxCall();
         }
     }, config['GET_STATE_INTERVAL']);
+    //add event listeners to bottom row of buttons
     for(let i = 0; i < 8; i++){
         document.getElementById("s" + i).addEventListener('click', function(){
             bottomButton(i);
         });
     }
+    //add listeners to other buttons
     document.getElementById("reserveButton").addEventListener('click', function(){
         makeReservation();
+    });
+    //TEST
+    document.getElementById("cancelConfirmationButton").addEventListener('click', function(){
+        closeModal();
     });
 })()
