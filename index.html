@@ -17,10 +17,10 @@
             </div>
         </div>
         <div id="reserveContainer">
-            <div id="reserveButton" class="reserve-inactive">Reserve</div><span id="firstInstruction"></span>
+            <div id="reserveButton" class="reserve-inactive">Reserve</div>
+            <span id="firstInstruction"></span>
         </div>
         <div id="currentDateContainer"></div>
-
         <div id="nextAvailableContainer">Bananas</div>
     </div>
     <div id="rightRibbon" class=""></div>
@@ -36,26 +36,29 @@
     </div>
 </div>
 <div id="confirmationModal" class="modal">
-    <div id="confirmationTop"></div>
-    <div id="confirmationBottom">
-        <div id="confirmationButton">Book Now</div>
-        <div id="cancelConfirmationButton"></div>
+    <div id="confirmationTop" class="modal-top">Booking Confirmation</div>
+    <div id="confirmationMiddle" class="modal-content"></div>
+    <div id="confirmationBottom" class="modal-bottom">
+        <div id="confirmationButton" class="modal-button">Book Now</div>
+        <div id="cancelConfirmationButton" class="modal-button">Cancel</div>
     </div>
 </div>
 <div id="resultModal" class="modal">
-    <div id="resultTop"></div>
-    <div id="resultBottom">
-        <div id="resultCloseButton" class="close-modal">Close</div>
+    <div id="resultTop" class="modal-top"></div>
+    <div id="resultMiddle" class="modal-content"></div>
+    <div id="resultBottom" class="modal-bottom">
+        <div id="resultCloseButton" class="modal-button close-modal">Close</div>
     </div>
 </div>
 <div id="errorModal" class="modal">
-    <div id="errorTop">
-        <div id="errorBottom">
-            <div id="errorClose" class="close-modal">Close</div>
-        </div>
+    <div id="errorTop" class="modal-top"></div>
+    <div id="errorMiddle" class="modal-content"></div>
+    <div id="errorBottom" class="modal-bottom">
+        <div id="errorClose" class="modal-button close-modal">Close</div>
     </div>
 </div>
 <div id="instructionScreen" class="screen"></div>
+
 <script src="scripts/app.js"></script>
 </body>
 </html>
