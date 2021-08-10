@@ -285,6 +285,12 @@ ERROR MODAL
     display: none;
 }
 
+#errorMiddle{
+    font-size: 32px;
+    padding: 30px;
+    height: 207px;
+}
+
 /**
 ------------------------------------------------------------------
 INSTRUCTION SCREEN
