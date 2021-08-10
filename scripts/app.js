@@ -247,6 +247,8 @@ function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
  * Render the slots based on the contents of the bottomButton objects.
  */
 function renderSlots(){
+    // cleanup function called
+    cleanup();
     state.anySlotAvailable = false;
     for(let i= 0; i < 8; i++) {
         let element = document.getElementById("s" + i)
@@ -268,18 +270,23 @@ function renderSlots(){
     }
     //TODO: Clean up some of this logic
     if(!state.anySlotAvailable){
+        //No Slots Available
         document.getElementById("firstInstruction").innerHTML = "";
-    }else{
+    }else if(!state['reply']['days']['null']){
+        //if server didn't send null for dates array
         document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
+    }else{
+        //if server did send null for dates array
     }
     if(state.reserveButtonActive){
+        //if reserve button is active (meaning user has clicked on something that can be booked)
         document.getElementById("reserveButton").className = "reserve-active";
         document.getElementById("firstInstruction").innerHTML = config.TAP_RESERVE;
     }else{
+        //reset the text if user cancels
         document.getElementById("reserveButton").className="reserve-inactive";
         document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
     }
-    cleanup();
 }
 
 /**
@@ -287,7 +294,14 @@ function renderSlots(){
  * This resets all modals, resets all state parameters, and clears up any remaining old data from the screen
  */
 function cleanup(){
+    //clean up modals
+    let modalContents = document.getElementsByName("modal-content");
+    for(let i = 0; i < modalContents.length; i++){
+        modalContents[i].innerHTML = "";
+    }
+    //clean up state parameters
 
+    //clean up screen
 }
 
 
@@ -345,6 +359,8 @@ function renderTime(timeContainerElement){
  */
 function error(message){
     //TODO: Implement Modal
+    renderModal("errorModal");
+    document.getElementById("errorMiddle").innerHTML = message;
     console.log(message);
 }
 
@@ -528,7 +544,12 @@ function makeAjaxCall(){
                 //TODO: It has nothing to do with that
             }else{
                 if(!interactionState.isInteracting()){
-                    populateSlots(JSON.parse(this.responseText));
+                    let JSONReply = JSON.parse(this.responseText);
+                    if(JSONReply['error']){
+                        error(JSON['error']);
+                    }else {
+                        populateSlots(JSONReply);
+                    }
                 }
             }
         }
@@ -557,6 +578,10 @@ function makeAjaxCall(){
     });
     //TEST
     document.getElementById("cancelConfirmationButton").addEventListener('click', function(){
+        closeModal();
+    });
+    //ERROR CLOSE
+    document.getElementById("errorClose").addEventListener('click', function(){
         closeModal();
     });
 })()
