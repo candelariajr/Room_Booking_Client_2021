@@ -28,7 +28,7 @@ const config = {
     // 5 minutes
     INTERACTION_TIMEOUT: 300000,
     FIRST_INSTRUCTION_TEXT: "Tap a Slot to Start",
-    UNABLE_TO_LOAD_DATA: "No Local Data Available",
+    UNABLE_TO_LOAD_DATA: "No Data Available",
     TAP_RESERVE: "Tap 'Reserve' to Continue"
 };
 
@@ -135,59 +135,23 @@ const interactionState = {
  * @ISOBeginTime: ISO format of start of booking slot
  * @ISOEndTIme: ISO format of end time of booking slot (ISO times are needed by the API).
  */
-let bottomButtons = [
-    {
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        pageLeft: false,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false
-    },{
-        time: null,
+let bottomButtons = []
+for(let i = 0; i < 7; i++){
+    bottomButtons.push({time: null,
+        endTime : null,
         ISOBeginTime : null,
         ISOEndTime: null,
         availability: null,
         pageRight: false,
-        selected: false
-    },
-]
+        selected: false}
+    );
+}
+/*
+* -------------------------------------------------------------------------------------------
+* END STARTUP SEQUENCE
+* -------------------------------------------------------------------------------------------
+* */
+
 
 /**
  * Pull the display times for the slots to be displayed at the bottom row and assign them to
@@ -236,7 +200,18 @@ function getDisplayTimesToButtonObject(){
  */
 function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
     let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
-    bottomButtons[slotArrayIndex]['time'] = slot['from-display'].split(" ")[0];
+    //Remove AM/PM at end
+    let startTime = slot['from-display'].split(" ")[0];
+    let endTime = slot['to-display'].split(" ")[0];
+    //Remove leading zeroes
+    if(startTime.charAt(0) === '0'){
+        startTime = startTime.substring(1, startTime.length)
+    }
+    if(endTime.charAt(0) === '0'){
+        endTime = endTime.substring(1, endTime.length)
+    }
+    bottomButtons[slotArrayIndex]['time'] = startTime
+    bottomButtons[slotArrayIndex]['endTime'] = endTime;
     bottomButtons[slotArrayIndex]['ISOBeginTime'] = slot['from-iso'];
     bottomButtons[slotArrayIndex]['ISOEndTime'] = slot['to-iso'];
     bottomButtons[slotArrayIndex]['availability'] = slot['status'];
@@ -300,8 +275,28 @@ function cleanup(){
         modalContents[i].innerHTML = "";
     }
     //clean up state parameters
-
+    state = {
+        anySlotAvailable: false,
+        startup: false,
+        currentIndex: 0,
+        availability: null,
+        reserveButtonActive: false,
+        selectedSlots: []
+    };
+    //clean up slots
+    for(let i = 0; i < bottomButtons.length; i++){
+        bottomButtons[i] = {
+            time: null,
+            endTime : null,
+            ISOBeginTime : null,
+            ISOEndTime: null,
+            availability: null,
+            pageRight: false,
+            selected: false
+        }
+    }
     //clean up screen
+    renderSlots();
 }
 
 
@@ -402,6 +397,7 @@ function closeModal(){
  * Plain text name of the root element of the screen to be rendered
  */
 function renderScreen(element){
+    closeModal();
 
 }
 
@@ -429,8 +425,13 @@ function getTimeSlotDisplay(serverDisplayFormat){
  * If something is selected and this button is active, render confirmation window
  */
 function makeReservation(){
+    // Note: Selected Slots is an array for in case we implement selecting multiple slots at once.
     if(state.reserveButtonActive){
-        console.log("reserve SOMETHING");
+        console.log(bottomButtons[state.selectedSlots[0]]);
+
+        document.getElementById("confirmationMiddle").innerHTML =
+            "You are reserving this room from " + bottomButtons[state.selectedSlots[0]]['time']  + " to " +
+            bottomButtons[state.selectedSlots[0]]['endTime'] +".";
         renderModal("confirmationModal");
     }
 }
@@ -546,7 +547,7 @@ function makeAjaxCall(){
                 if(!interactionState.isInteracting()){
                     let JSONReply = JSON.parse(this.responseText);
                     if(JSONReply['error']){
-                        error(JSON['error']);
+                        error(JSONReply['error']);
                     }else {
                         populateSlots(JSONReply);
                     }
