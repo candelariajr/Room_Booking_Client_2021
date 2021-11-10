@@ -234,6 +234,12 @@ MODAL GLOBAL
     background-color: black;
 }
 
+.modal-content{
+    font-size: 32px;
+    padding: 30px;
+    height: 207px;
+}
+
 .modal-bottom{
     position: absolute;
     bottom: 0;
@@ -286,9 +292,7 @@ ERROR MODAL
 }
 
 #errorMiddle{
-    font-size: 32px;
-    padding: 30px;
-    height: 207px;
+
 }
 
 /**
