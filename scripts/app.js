@@ -94,7 +94,7 @@ const config = {
         renderTime("timeContainer");
         const clockString = hour + ":" + minute + ":" + second + amPm;
         if(clockString === config['RELOAD_TIME']){
-            location.reload();
+            location.reload(true);
         }
     }, 1000);
 })();
