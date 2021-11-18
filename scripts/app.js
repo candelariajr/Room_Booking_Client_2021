@@ -121,7 +121,9 @@ const interactionState = {
         this.timeout = null;
         this.state = false;
         state.reserveButtonActive = false;
-        bottomButtons[state.selectedSlot]['selected'] = false;
+        if(bottomButtons[state.selectedSlot]['selected']){
+            bottomButtons[state.selectedSlot]['selected'] = false;
+        }
         state.selectedSlot = null;
         renderSlots();
     },
@@ -136,8 +138,9 @@ const interactionState = {
  * @ISOEndTIme: ISO format of end time of booking slot (ISO times are needed by the API).
  */
 let bottomButtons = []
-for(let i = 0; i < 7; i++){
-    bottomButtons.push({time: null,
+for(let i = 0; i < 8; i++){
+    bottomButtons.push({
+        time: null,
         endTime : null,
         ISOBeginTime : null,
         ISOEndTime: null,
@@ -244,23 +247,25 @@ function renderSlots(){
         }
     }
     //TODO: Clean up some of this logic
-    if(!state.anySlotAvailable){
+    if(state.anySlotAvailable === false){
         //No Slots Available
         document.getElementById("firstInstruction").innerHTML = "";
-    }else if(!state['reply']['days']['null']){
+    }else if(state['reply']['days']['null'] === false){
         //if server didn't send null for dates array
         document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
     }else{
         //if server did send null for dates array
     }
-    if(state.reserveButtonActive){
+    if(state.reserveButtonActive === true){
         //if reserve button is active (meaning user has clicked on something that can be booked)
         document.getElementById("reserveButton").className = "reserve-active";
         document.getElementById("firstInstruction").innerHTML = config.TAP_RESERVE;
     }else{
         //reset the text if user cancels
         document.getElementById("reserveButton").className="reserve-inactive";
-        document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
+        if(state.anySlotAvailable !== false){
+            document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
+        }
     }
 }
 
@@ -277,7 +282,7 @@ function cleanup(){
     //clean up state parameters
     state = {
         anySlotAvailable: false,
-        startup: false,
+        // startup: false,
         currentIndex: 0,
         availability: null,
         reserveButtonActive: false,
@@ -295,8 +300,6 @@ function cleanup(){
             selected: false
         }
     }
-    //clean up screen
-    renderSlots();
 }
 
 
@@ -532,7 +535,8 @@ function processKey(e){
  * Function to get the data from the server and send it to the populate function
  */
 function makeAjaxCall(){
-    if(!state.startup){
+    console.log(state.startup)
+    if(state.startup === false){
         document.getElementById("locationContainer").innerHTML = "Getting New Data...";
         state.startup = true;
     }
