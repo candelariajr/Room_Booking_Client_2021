@@ -187,6 +187,18 @@ function getDisplayTimesToButtonObject(){
             buttonSlotPosition++;
         }
     }
+    //add a blurb to display next available time
+    let nextAvailTime = null;
+    for(let i = 0; i < bottomButtons.length; i++){
+        if(!nextAvailTime){
+            if(bottomButtons[i].availability === 'available'){
+                nextAvailTime = bottomButtons[i].time;
+            }
+        }
+    }
+    if(nextAvailTime){
+        document.getElementById("statusContainer").innerHTML = ("Unavailable: Opens at " + nextAvailTime);
+    }
     renderSlots();
 }
 
@@ -202,7 +214,6 @@ function getDisplayTimesToButtonObject(){
  * The slot index the server data goes into
  */
 function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
-    console.log("setSlotData" + serverDataDay + " " + serverSlotIndex + " " + slotArrayIndex);
     let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
     //Remove AM/PM at end
     let startTime = slot['from-display'].split(" ")[0];
