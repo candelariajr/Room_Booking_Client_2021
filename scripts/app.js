@@ -576,11 +576,13 @@ function makeAjaxCall(){
     //add event listeners to bottom row of buttons
     for(let i = 0; i < 8; i++){
         document.getElementById("s" + i).addEventListener('click', function(){
+            interactionState.interact();
             bottomButton(i);
         });
     }
     //add listeners to other buttons
     document.getElementById("reserveButton").addEventListener('click', function(){
+        interactionState.interact();
         makeReservation();
     });
     //TEST
