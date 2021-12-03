@@ -15,7 +15,7 @@ const config = {
     RELOAD_TIME: "3:00:00AM",
     //Note: Only one screen can be rendered at one time
     SCREENS: [
-      "appContainer", "instructionScreen"
+        "appContainer", "instructionScreen"
     ],
     //Note: Only 1 screen and 1 modal can be rendered at once
     MODALS: [
@@ -94,7 +94,7 @@ const config = {
         renderTime("timeContainer");
         const clockString = hour + ":" + minute + ":" + second + amPm;
         if(clockString === config['RELOAD_TIME']){
-            location.reload(true);
+            location.reload(true);  //TODO: Update this
         }
     }, 1000);
 })();
@@ -202,6 +202,7 @@ function getDisplayTimesToButtonObject(){
  * The slot index the server data goes into
  */
 function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
+    console.log("setSlotData" + serverDataDay + " " + serverSlotIndex + " " + slotArrayIndex);
     let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
     //Remove AM/PM at end
     let startTime = slot['from-display'].split(" ")[0];
@@ -226,10 +227,10 @@ function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
  */
 function renderSlots(){
     // cleanup function called
-    cleanup();
+    // cleanup();
     state.anySlotAvailable = false;
     for(let i= 0; i < 8; i++) {
-        let element = document.getElementById("s" + i)
+        let element = document.getElementById("s" + i);
         if (bottomButtons[i]['availability'] &&
             //Redundant, but error checking kept flagging this one
             typeof bottomButtons[i]['availability'] === 'string' &&
@@ -317,12 +318,12 @@ function bottomButton(i){
             bottomButtons[i]['selected'] = true;
             state.selectedSlots[0] = i;
             state.reserveButtonActive = true;
-        //if slot is already selected
+            //if slot is already selected
         }else if(i === state.selectedSlots[0]){
             bottomButtons[i]['selected'] = false;
             state.selectedSlots[0] = null;
             state.reserveButtonActive = false;
-        //if different slot is selected
+            //if different slot is selected
         }else{
             bottomButtons[state.selectedSlots[0]]['selected'] = false;
             bottomButtons[i]['selected'] = true;
@@ -553,6 +554,7 @@ function makeAjaxCall(){
                     if(JSONReply['error']){
                         error(JSONReply['error']);
                     }else {
+                        cleanup();
                         populateSlots(JSONReply);
                     }
                 }
