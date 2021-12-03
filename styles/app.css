@@ -126,7 +126,7 @@ INITIAL SCREEN
     padding-top: 15px;
     padding-bottom: 15px;
     display: inline-block;
-    margin-left: 165px;
+    margin-left: 100px;
 }
 
 #reserveButton.reserve-active{
@@ -150,7 +150,7 @@ INITIAL SCREEN
     font-weight:bold;
     font-size: 28px;
     float: right;
-    padding-right: 100px;
+    padding-right: 50px;
 }
 
 #nextAvailableContainer{
