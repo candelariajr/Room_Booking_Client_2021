@@ -27,5 +27,5 @@ const config = {
     //This is the maximum time to wait for a response from the API call before resetting
     //This doesn't benefit anything, but prevents the app from locking up if the server is slow enough
     // to time out the API request
-    MAX_API_WAIT_TIME: 5000
+    MAX_API_WAIT_TIME: 60000
 };
