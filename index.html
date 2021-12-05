@@ -14,7 +14,7 @@
         <div id="mainTopSection">
             <div id="leftColorBar" class=""></div>
             <div id="rightInfoScreen">
-                <div id="timeContainer">Initializing Date...</div>
+                <div id="timeContainer">Initializing Data...</div>
                 <div id="locationContainer">Syncing...</div>
                 <div id="statusContainer"></div>
             </div>
@@ -24,7 +24,7 @@
             <span id="firstInstruction"></span>
         </div>
         <div id="currentDateContainer"></div>
-        <div id="nextAvailableContainer"></div><!-- TODO: Implement Next Avail -->
+        <div id="nextAvailableContainer"></div><!-- app.js getDisplayTimesToButtonObject -->
     </div>
     <div id="rightRibbon" class=""></div>
     <div id="bookingSlots">
@@ -38,6 +38,19 @@
         <div id="s7" class="bookingSlot"></div>
     </div>
 </div>
+<div id="instructionScreen" class="screen">
+    <div id="mainInstructionText">
+        Swipe App Card
+    </div>
+    <div id="subInstructionPane">
+        <div id="instructionSubtext">Magnetic Stripe Faces Away From You"></div>
+        <div id="InstructionGraphic"></div>
+    </div>
+    <div id="instructionButtons">
+        <div id="instructionCancel" class="modal-button">Cancel</div>
+    </div>
+</div>
+<!-- MODALS GO AFTER SCREENS -->
 <div id="confirmationModal" class="modal">
     <div id="confirmationTop" class="modal-top">Booking Confirmation</div>
     <div id="confirmationMiddle" class="modal-content"></div>
@@ -60,8 +73,7 @@
         <div id="errorClose" class="modal-button close-modal">Close</div>
     </div>
 </div>
-<div id="instructionScreen" class="screen"></div>
-
+<script src="scripts/app_config.js"></script>
 <script src="scripts/app.js"></script>
 </body>
 </html>
