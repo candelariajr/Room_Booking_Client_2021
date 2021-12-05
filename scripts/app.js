@@ -1,18 +1,19 @@
 // Declaration of global state object
 let state = {
     anySlotAvailable: false,
+    activeModal: false,
     startup: false,
     currentIndex: 0,
     availability: null,
     reserveButtonActive: false,
-    selectedSlots: []
+    selectedSlots: [],
+    cardNumber: ""
 };
 
-// Declaration of global config object used for display text
-const config = {
-    SERVER_SCRIPT_URL : "http://localhost/Room_Booking_Web_Server/room_booking.php",
-    GET_STATE_INTERVAL: 10000,
-    RELOAD_TIME: "3:00:00AM",
+
+// Global variables mainly used for development purposes - not a part of general config or to be adjusted
+// in installation
+const globals = {
     //Note: Only one screen can be rendered at one time
     SCREENS: [
         "appContainer", "instructionScreen"
@@ -21,20 +22,15 @@ const config = {
     MODALS: [
         "confirmationModal", "resultModal", "errorModal"
     ],
-    //They tell me not to do this, but I KNOW that we'll need it. Keeping it. Just making it lest noticeable
-    //before changing it during implementation.
-    //One Hour
-    //INTERACTION_TIMEOUT: 3600000
-    // 5 minutes
-    INTERACTION_TIMEOUT: 300000,
-    FIRST_INSTRUCTION_TEXT: "Tap a Slot to Start",
-    UNABLE_TO_LOAD_DATA: "No Data Available",
-    TAP_RESERVE: "Tap 'Reserve' to Continue"
+    SLOT_COUNT: 8, //to be removed when Zoop is added in the future
+    ZOOP: false,
+    DISABLE_TIMEOUT: false //used only for development and testing
 };
 
 /**
  * Self-invoking function
  * Generate clock object to update the state to contain the currently displayed time every second
+ * Runs non-stop and reloads the site at configured reload time (default 3am)
  */
 (function () {
     setInterval(function () {
@@ -117,15 +113,30 @@ const interactionState = {
         return this.state
     },
     endInteraction: function(){
+        if(!globals.DISABLE_TIMEOUT){
+            // manage interaction state
+            clearTimeout(this.timeout);
+            this.timeout = null;
+            this.state = false;
+            // remove keydown listener
+            window.removeEventListener("keydown", processKey, true);
+            // in case of handshaking and local I/O being out of sync
+            state['cardNumber'] = "" ;
+            // soft cleanup
+            clearSelection();
+            renderSlots();
+            // render main screen
+            renderScreen("appContainer");
+        }
+    },
+    interactTime: function(time){
+        this.state = true;
         clearTimeout(this.timeout);
         this.timeout = null;
-        this.state = false;
-        state.reserveButtonActive = false;
-        if(bottomButtons[state.selectedSlot]['selected']){
-            bottomButtons[state.selectedSlot]['selected'] = false;
-        }
-        state.selectedSlot = null;
-        renderSlots();
+        this.timeout = setTimeout(function(){
+            console.log("Timed out for " + time);
+            interactionState.endInteraction();
+        }, time)
     },
     timeout: null
 }
@@ -138,7 +149,7 @@ const interactionState = {
  * @ISOEndTIme: ISO format of end time of booking slot (ISO times are needed by the API).
  */
 let bottomButtons = []
-for(let i = 0; i < 8; i++){
+for(let i = 0; i < globals.SLOT_COUNT; i++){
     bottomButtons.push({
         time: null,
         endTime : null,
@@ -168,14 +179,14 @@ function getDisplayTimesToButtonObject(){
         return;
     }
     //There are at least 8 slots here
-    if(state['reply']['days'][0]['time-slots'].length >= 8){
-        for(let i = 0; i < 8; i++) {
+    if(state['reply']['days'][0]['time-slots'].length >= bottomButtons.length){
+        for(let i = 0; i < bottomButtons.length; i++) {
             setSlotData(0, i, i)
         }
     }else{
         //pick up the last slots of the current day and the ones from the next day for a total of 8
         let firstDaySlotCount = state['reply']['days'][0]['time-slots'].length;
-        let secondDaySlotCount = 8 - firstDaySlotCount;
+        let secondDaySlotCount = bottomButtons.length - firstDaySlotCount;
         let  buttonSlotPosition = 0;
         //TODO: Audit this as there is probably an off by 1 error in here somewhere.
         for(let i = 0; i < firstDaySlotCount; i++){
@@ -188,16 +199,27 @@ function getDisplayTimesToButtonObject(){
         }
     }
     //add a blurb to display next available time
-    let nextAvailTime = null;
-    for(let i = 0; i < bottomButtons.length; i++){
-        if(!nextAvailTime){
-            if(bottomButtons[i].availability === 'available'){
-                nextAvailTime = bottomButtons[i].time;
+    //TODO: This is unorganized
+    if(!state['reply']['available']){
+        let nextAvailTime = null;
+        for(let i = 0; i < bottomButtons.length; i++){
+            if(!nextAvailTime){
+                if(bottomButtons[i]['availability'] === 'available'){
+                    nextAvailTime = bottomButtons[i].time;
+                }
             }
         }
+        if(nextAvailTime){
+            let templatePartials = config.NEXT_AVAILABLE.split("#");
+            document.getElementById("statusContainer").innerHTML = (templatePartials[0] +
+                " " +
+                nextAvailTime +
+                templatePartials[1]);
+        }
     }
-    if(nextAvailTime){
-        document.getElementById("statusContainer").innerHTML = ("Unavailable: Opens at " + nextAvailTime);
+    //If app is frozen for dev/testing, this makes a fake booking slot available
+    if(globals.DISABLE_TIMEOUT){
+        bottomButtons[2]['availability'] = 'available';
     }
     renderSlots();
 }
@@ -293,6 +315,7 @@ function cleanup(){
     }
     //clean up state parameters
     state = {
+        cardNumber: "",
         anySlotAvailable: false,
         // startup: false,
         currentIndex: 0,
@@ -313,7 +336,6 @@ function cleanup(){
         }
     }
 }
-
 
 /**
  * Event that takes an argument based on event listener assignment
@@ -340,6 +362,8 @@ function bottomButton(i){
             bottomButtons[i]['selected'] = true;
             state.selectedSlots[0] = i;
         }
+    }else{
+        error(config.SLOT_UNAVAILABLE);
     }
     renderSlots();
 }
@@ -368,10 +392,9 @@ function renderTime(timeContainerElement){
  * @param message
  */
 function error(message){
-    //TODO: Implement Modal
     renderModal("errorModal");
     document.getElementById("errorMiddle").innerHTML = message;
-    console.log(message);
+    console.log("ERROR: " + message);
 }
 
 /**
@@ -381,29 +404,40 @@ function error(message){
  * different functions so a template doesn't work.
  */
 function renderModal(element){
-    for(let i = 0; i < config.MODALS.length; i++){
-        if(element === config.MODALS[i]){
-            document.getElementById(config.MODALS[i]).style.display = "block";
+    state.activeModal = true;
+    for(let i = 0; i < globals.MODALS.length; i++){
+        if(element === globals.MODALS[i]){
+            document.getElementById(globals.MODALS[i]).style.display = "block";
         }else{
-            document.getElementById(config.MODALS[i]).style.display = "none";
+            document.getElementById(globals.MODALS[i]).style.display = "none";
         }
     }
-    for(let i = 0; i < config.SCREENS.length; i++){
+    for(let i = 0; i < globals.SCREENS.length; i++){
         //make all screens opaque
-        document.getElementById(config.SCREENS[i]).className = "screen opaque";
+        document.getElementById(globals.SCREENS[i]).className = "screen opaque";
     }
+}
+
+/**
+ * Server makes call to API - This is the result of said API passed back to the web client
+ * @param message
+ */
+function resultModal(message){
+    document.getElementById("resultMiddle").innerHTML = message;
+    renderModal("resultModal");
 }
 
 /**
  * Close modal: Close all modals and remove opacity filter
  */
 function closeModal(){
-    for(let i = 0; i < config.MODALS.length; i++){
-        document.getElementById(config.MODALS[i]).style.display = "none";
+    state.activeModal = false;
+    for(let i = 0; i < globals.MODALS.length; i++){
+        document.getElementById(globals.MODALS[i]).style.display = "none";
     }
-    for(let i = 0; i < config.SCREENS.length; i++){
+    for(let i = 0; i < globals.SCREENS.length; i++){
         //make all screens clear (but NOT displayed)
-        document.getElementById(config.SCREENS[i]).className = "screen";
+        document.getElementById(globals.SCREENS[i]).className = "screen";
     }
 }
 
@@ -412,27 +446,16 @@ function closeModal(){
  * Plain text name of the root element of the screen to be rendered
  */
 function renderScreen(element){
+    for(let i = 0; i < globals.SCREENS.length; i++){
+        //make all screens clear (but NOT displayed)
+        //document.getElementById(config.SCREENS[i]).className = "screen";
+        if(element === globals.SCREENS[i]){
+            document.getElementById(element).style.display = "block";
+        }else{
+            document.getElementById(globals.SCREENS[i]).style.display = "none";
+        }
+    }
     closeModal();
-
-}
-
-/**
- * @param element
- * Plain text name of the root element of the screen to be closed
- */
-function closeScreen(element){
-
-}
-
-/**
- * Trim the availability string for display
- * @param serverDisplayFormat
- * The from/to-display from the server
- * @returns {string}
- * A string that works better for the slot display
- */
-function getTimeSlotDisplay(serverDisplayFormat){
-    return "";
 }
 
 /**
@@ -443,21 +466,34 @@ function makeReservation(){
     // Note: Selected Slots is an array for in case we implement selecting multiple slots at once.
     if(state.reserveButtonActive){
         console.log(bottomButtons[state.selectedSlots[0]]);
-
+        let templatePartials = config.CONFIRMATION_PROMPT.split("#", 3);
         document.getElementById("confirmationMiddle").innerHTML =
-            "You are reserving this room from " + bottomButtons[state.selectedSlots[0]]['time']  + " to " +
-            bottomButtons[state.selectedSlots[0]]['endTime'] +".";
+            templatePartials[0] +
+            bottomButtons[state.selectedSlots[0]]['time']  +
+            templatePartials[1] +
+            bottomButtons[state.selectedSlots[0]]['endTime'] +
+            templatePartials[2];
         renderModal("confirmationModal");
     }
 }
 
 /**
- * Populate the slots
- * Render the results to the screen
+ * Clears out selection state in the case of idling out, cancel after booking confirm, cancel swipe
+ */
+function clearSelection(){
+    for(let i = 0; i < bottomButtons.length; i++){
+        bottomButtons[i].selected = false;
+    }
+    state.reserveButtonActive = false;
+    state.selectedSlots = [];
+}
+
+/**
+ * Render the results to the screen, calls for construction of model
  * @param serverReply
  * the JSON response from the server with the state and slot info
  */
-function populateSlots(serverReply){
+function renderMainScreen(serverReply){
     //snap Server reply to Global State
     state['reply'] = serverReply;
     //render the big display colors (Color Bar and Ribbon)
@@ -482,15 +518,8 @@ function populateSlots(serverReply){
         document.getElementById("rightRibbon").classList.remove('available');
         document.getElementById("rightRibbon").classList.add('unavailable');
     }
+    // populate the bottom buttons object array with appropriate data
     getDisplayTimesToButtonObject();
-}
-
-/**
- * Called when a booking slot is clicked
- * If it is a positive page screen
- */
-function select(){
-
 }
 
 /**
@@ -505,14 +534,16 @@ function select(){
  * string for the LibCal ID
  */
 function bookNow(bannerID, startISO, endISO, roomID){
+    interactionState.interactTime(config.MAX_API_WAIT_TIME);
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function(){
         if(this.readyState === 4){
             //interact();
             if(this.status === 200){
-                //bookingModal(this.responseText);
+                resultModal(this.responseText);
             }else{
                 //bookingModal('{"error": "SERVER ERROR"}');
+                error(this.responseText);
             }
         }
     };
@@ -528,17 +559,19 @@ function bookNow(bannerID, startISO, endISO, roomID){
  * keyboard event
  */
 function processKey(e){
+    console.log(state.cardNumber);
     if(/^[0-9]$/i.test(e.key)){
-        state["card_number"]+=e.key;
+        state.cardNumber+= e.key;
     }
-    if(state["card_number"].length === 9){
+    if(state['cardNumber'].length === 9){
         //console.log("BID: " + state["card_number"]);
-        let startISO = state['startISO'];
-        let endISO = state['endISO'];
+        let startISO = bottomButtons[state.selectedSlots[0]].ISOBeginTime;
+        let endISO = bottomButtons[state.selectedSlots[0]].ISOEndTime;
         let roomID = state['reply']['id'];
         window.removeEventListener("keydown", processKey, true);
-        let cardNumber = state["card_number"];
-        state["card_number"] = "";
+        let cardNumber = state.cardNumber;
+        state.cardNumber = "";
+        //error(startISO + " " + endISO + " " + roomID + " " + cardNumber);
         bookNow(cardNumber, startISO, endISO, roomID);
     }
 }
@@ -547,7 +580,7 @@ function processKey(e){
  * Function to get the data from the server and send it to the populate function
  */
 function makeAjaxCall(){
-    console.log(state.startup)
+    //console.log(state.startup)
     if(state.startup === false){
         document.getElementById("locationContainer").innerHTML = "Getting New Data...";
         state.startup = true;
@@ -559,6 +592,9 @@ function makeAjaxCall(){
                 //TODO: Need some kind of handling here - would love to use a popup or cancel
                 //TODO: but apparently someone has decided it's not ADA friendly.
                 //TODO: It has nothing to do with that
+                if(this.status === 500){
+                    error(config.DEAD_SERVER);
+                }
             }else{
                 if(!interactionState.isInteracting()){
                     let JSONReply = JSON.parse(this.responseText);
@@ -566,7 +602,7 @@ function makeAjaxCall(){
                         error(JSONReply['error']);
                     }else {
                         cleanup();
-                        populateSlots(JSONReply);
+                        renderMainScreen(JSONReply);
                     }
                 }
             }
@@ -578,6 +614,9 @@ function makeAjaxCall(){
 
 //Start main application and attach event listeners
 (()=>{
+    // set static items
+    document.getElementById("mainInstructionText").innerHTML = config.MAIN_INSTRUCTION_TEXT;
+    document.getElementById("instructionSubtext").innerHTML = config.SUB_INSTRUCTION_TEXT;
     // declare main loop that's always running
     let mainLoop = setInterval(function(){
         if(!interactionState.isInteracting()){
@@ -592,16 +631,48 @@ function makeAjaxCall(){
         });
     }
     //add listeners to other buttons
+    //=======================================================================================================
+    //RESERVE BUTTON
     document.getElementById("reserveButton").addEventListener('click', function(){
         interactionState.interact();
         makeReservation();
     });
-    //TEST
+
+    //CANCEL BOOKING - KEEP SELECTION - RETURN TO MAIN
     document.getElementById("cancelConfirmationButton").addEventListener('click', function(){
+        interactionState.interactTime(config.SWIPE_TIMEOUT);
         closeModal();
     });
+
+    //OK BOOKING - MOVE TO SWIPE ID SCREEN
+    document.getElementById("confirmationButton").addEventListener('click', function(){
+        interactionState.interactTime(config.SWIPE_TIMEOUT);
+        window.addEventListener("keydown", processKey, true);
+        /*
+        * Some logic needs to be here to prepare the renderer as if a 'success' comes back from the server, the model
+        * is no longer valid and the screen should be at a place to re-render anyway to reflect the booking.
+        * */
+        renderScreen("instructionScreen");
+    });
+
     //ERROR CLOSE
     document.getElementById("errorClose").addEventListener('click', function(){
+        interactionState.endInteraction();
         closeModal();
+    });
+
+    // INSTRUCTION CANCEL
+    // Clears Application State - opens to server reply
+    document.getElementById("instructionCancel").addEventListener('click', function(){
+        interactionState.endInteraction();
+        renderScreen("appContainer");
+    });
+
+    // RESULT MODAL CLOSE
+    // Reloads App
+    document.getElementById("resultCloseButton").addEventListener('click', function(){
+        interactionState.endInteraction();
+        closeModal();
+        makeAjaxCall();
     });
 })()
