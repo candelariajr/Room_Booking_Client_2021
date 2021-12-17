@@ -14,17 +14,17 @@ let state = {
 // Global variables mainly used for development purposes - not a part of general config or to be adjusted
 // in installation
 const globals = {
-    //Note: Only one screen can be rendered at one time
+    // Note: Only one screen can be rendered at one time
     SCREENS: [
         "appContainer", "instructionScreen"
     ],
-    //Note: Only 1 screen and 1 modal can be rendered at once
+    // Note: Only 1 screen and 1 modal can be rendered at once
     MODALS: [
         "confirmationModal", "resultModal", "errorModal"
     ],
-    SLOT_COUNT: 8, //to be removed when Zoop is added in the future
+    SLOT_COUNT: 8, // to be removed when Zoop is added in the future
     ZOOP: false,
-    DISABLE_TIMEOUT: false //used only for development and testing
+    DISABLE_TIMEOUT: false // used only for development and testing
 };
 
 /**
@@ -90,7 +90,9 @@ const globals = {
         renderTime("timeContainer");
         const clockString = hour + ":" + minute + ":" + second + amPm;
         if(clockString === config['RELOAD_TIME']){
-            location.reload(true);  //TODO: Update this
+            // TODO: Update this
+            // noinspection JSDeprecatedSymbols
+            location.reload(true);
         }
     }, 1000);
 })();
@@ -175,16 +177,16 @@ for(let i = 0; i < globals.SLOT_COUNT; i++){
  */
 function getDisplayTimesToButtonObject(){
     if(!state['reply']){
-        error(config.UNABLE_TO_LOAD_DATA);
+        error(config.UNABLE_TO_LOAD_DATA, 1);
         return;
     }
-    //There are at least 8 slots here
+    // There are at least 8 slots here
     if(state['reply']['days'][0]['time-slots'].length >= bottomButtons.length){
         for(let i = 0; i < bottomButtons.length; i++) {
             setSlotData(0, i, i)
         }
     }else{
-        //pick up the last slots of the current day and the ones from the next day for a total of 8
+        // pick up the last slots of the current day and the ones from the next day for a total of 8
         let firstDaySlotCount = state['reply']['days'][0]['time-slots'].length;
         let secondDaySlotCount = bottomButtons.length - firstDaySlotCount;
         let  buttonSlotPosition = 0;
@@ -198,8 +200,8 @@ function getDisplayTimesToButtonObject(){
             buttonSlotPosition++;
         }
     }
-    //add a blurb to display next available time
-    //TODO: This is unorganized
+    // add a blurb to display next available time
+    // TODO: This is unorganized
     if(!state['reply']['available']){
         let nextAvailTime = null;
         for(let i = 0; i < bottomButtons.length; i++){
@@ -217,7 +219,7 @@ function getDisplayTimesToButtonObject(){
                 templatePartials[1]);
         }
     }
-    //If app is frozen for dev/testing, this makes a fake booking slot available
+    // If app is frozen for dev/testing, this makes a fake booking slot available
     if(globals.DISABLE_TIMEOUT){
         bottomButtons[2]['availability'] = 'available';
     }
@@ -237,10 +239,10 @@ function getDisplayTimesToButtonObject(){
  */
 function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
     let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
-    //Remove AM/PM at end
+    // Remove AM/PM at end
     let startTime = slot['from-display'].split(" ")[0];
     let endTime = slot['to-display'].split(" ")[0];
-    //Remove leading zeroes
+    // Remove leading zeroes
     if(startTime.charAt(0) === '0'){
         startTime = startTime.substring(1, startTime.length)
     }
@@ -265,7 +267,7 @@ function renderSlots(){
     for(let i= 0; i < 8; i++) {
         let element = document.getElementById("s" + i);
         if (bottomButtons[i]['availability'] &&
-            //Redundant, but error checking kept flagging this one
+            // Redundant, but error checking kept flagging this one
             typeof bottomButtons[i]['availability'] === 'string' &&
             bottomButtons[i]['availability'].toString() === 'available') {
             state.anySlotAvailable = true;
@@ -280,22 +282,22 @@ function renderSlots(){
             element.className = "bookingSlot selected";
         }
     }
-    //TODO: Clean up some of this logic
+    // TODO: Clean up some of this logic
     if(state.anySlotAvailable === false){
-        //No Slots Available
+        // No Slots Available
         document.getElementById("firstInstruction").innerHTML = "";
     }else if(state['reply']['days']['null'] === false){
-        //if server didn't send null for dates array
+        // if server didn't send null for dates array
         document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
     }else{
-        //if server did send null for dates array
+        // if server did send null for dates array
     }
     if(state.reserveButtonActive === true){
-        //if reserve button is active (meaning user has clicked on something that can be booked)
+        // if reserve button is active (meaning user has clicked on something that can be booked)
         document.getElementById("reserveButton").className = "reserve-active";
         document.getElementById("firstInstruction").innerHTML = config.TAP_RESERVE;
     }else{
-        //reset the text if user cancels
+        // reset the text if user cancels
         document.getElementById("reserveButton").className="reserve-inactive";
         if(state.anySlotAvailable !== false){
             document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
@@ -308,12 +310,12 @@ function renderSlots(){
  * This resets all modals, resets all state parameters, and clears up any remaining old data from the screen
  */
 function cleanup(){
-    //clean up modals
+    // clean up modals
     let modalContents = document.getElementsByName("modal-content");
     for(let i = 0; i < modalContents.length; i++){
         modalContents[i].innerHTML = "";
     }
-    //clean up state parameters
+    // clean up state parameters
     state = {
         cardNumber: "",
         anySlotAvailable: false,
@@ -323,7 +325,7 @@ function cleanup(){
         reserveButtonActive: false,
         selectedSlots: []
     };
-    //clean up slots
+    // clean up slots
     for(let i = 0; i < bottomButtons.length; i++){
         bottomButtons[i] = {
             time: null,
@@ -344,26 +346,26 @@ function cleanup(){
  */
 function bottomButton(i){
     interactionState.interact();
-    //if slot is available
+    // if slot is available
     if(bottomButtons[i]['availability'] === 'available'){
-        //if nothing else is selected
+        // if nothing else is selected
         if(!state.reserveButtonActive){
             bottomButtons[i]['selected'] = true;
             state.selectedSlots[0] = i;
             state.reserveButtonActive = true;
-            //if slot is already selected
+            // if slot is already selected
         }else if(i === state.selectedSlots[0]){
             bottomButtons[i]['selected'] = false;
             state.selectedSlots[0] = null;
             state.reserveButtonActive = false;
-            //if different slot is selected
+            // if different slot is selected
         }else{
             bottomButtons[state.selectedSlots[0]]['selected'] = false;
             bottomButtons[i]['selected'] = true;
             state.selectedSlots[0] = i;
         }
     }else{
-        error(config.SLOT_UNAVAILABLE);
+        error(config.SLOT_UNAVAILABLE, 0);
     }
     renderSlots();
 }
@@ -374,8 +376,8 @@ function bottomButton(i){
  * context menu's default object which is the mouse event
  */
 window.oncontextmenu = function(e){
-    //TODO: Uncomment this for production
-    //e.preventDefault();
+    // TODO: Uncomment this for production
+    // e.preventDefault();
 }
 
 /**
@@ -383,19 +385,32 @@ window.oncontextmenu = function(e){
  */
 function renderTime(timeContainerElement){
     document.getElementById(timeContainerElement).innerHTML = state['time'];
-    //rendering Date as well
-    document.getElementById("currentDateContainer").innerHTML = state['date'];
+    // rendering Date as well
+    // Removed Element for Zoop
+    // document.getElementById("currentDateContainer").innerHTML = state['date'];
 }
 
 /**
  * Renders Error modal to screen with message
  * @param message
+ * @param system - If set to 1, treats as system error - this is for future error management implementation
  */
-function error(message){
+function error(message, system){
     renderModal("errorModal");
     document.getElementById("errorMiddle").innerHTML = message;
+    if(system === 1){
+        submitError(message)
+    }
+}
+
+/**
+ * Function stub - future version will be able to report client system errors to server
+ * @param message
+ */
+function submitError(message){
     console.log("ERROR: " + message);
 }
+
 
 /**
  * @param element
@@ -413,7 +428,7 @@ function renderModal(element){
         }
     }
     for(let i = 0; i < globals.SCREENS.length; i++){
-        //make all screens opaque
+        // make all screens opaque
         document.getElementById(globals.SCREENS[i]).className = "screen opaque";
     }
 }
@@ -436,7 +451,7 @@ function closeModal(){
         document.getElementById(globals.MODALS[i]).style.display = "none";
     }
     for(let i = 0; i < globals.SCREENS.length; i++){
-        //make all screens clear (but NOT displayed)
+        // make all screens clear (but NOT displayed)
         document.getElementById(globals.SCREENS[i]).className = "screen";
     }
 }
@@ -447,8 +462,8 @@ function closeModal(){
  */
 function renderScreen(element){
     for(let i = 0; i < globals.SCREENS.length; i++){
-        //make all screens clear (but NOT displayed)
-        //document.getElementById(config.SCREENS[i]).className = "screen";
+        // make all screens clear (but NOT displayed)
+        // document.getElementById(config.SCREENS[i]).className = "screen";
         if(element === globals.SCREENS[i]){
             document.getElementById(element).style.display = "block";
         }else{
@@ -494,27 +509,27 @@ function clearSelection(){
  * the JSON response from the server with the state and slot info
  */
 function renderMainScreen(serverReply){
-    //snap Server reply to Global State
+    // snap Server reply to Global State
     state['reply'] = serverReply;
-    //render the big display colors (Color Bar and Ribbon)
-    //render the text (avail, room number)
+    // render the big display colors (Color Bar and Ribbon)
+    // render the text (avail, room number)
     document.getElementById("locationContainer").innerHTML = serverReply["room-display-text"]
     if(serverReply["available"]){
-        //Text
+        // Text
         document.getElementById("statusContainer").innerHTML = "Available"
-        //Left Color Bar
+        // Left Color Bar
         document.getElementById("leftColorBar").classList.remove('unavailable');
         document.getElementById("leftColorBar").classList.add('available');
-        //Right Ribbon
+        // Right Ribbon
         document.getElementById("rightRibbon").classList.remove('unavailable');
         document.getElementById("rightRibbon").classList.add('available');
     }else{
-        //Text
+        // Text
         document.getElementById("statusContainer").innerHTML = "Unavailable"
-        //Left Color Bar
+        // Left Color Bar
         document.getElementById("leftColorBar").classList.remove('available');
         document.getElementById("leftColorBar").classList.add('unavailable');
-        //Left Color Bar
+        // Right Ribbon
         document.getElementById("rightRibbon").classList.remove('available');
         document.getElementById("rightRibbon").classList.add('unavailable');
     }
@@ -538,12 +553,12 @@ function bookNow(bannerID, startISO, endISO, roomID){
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function(){
         if(this.readyState === 4){
-            //interact();
+            // interact();
             if(this.status === 200){
                 resultModal(this.responseText);
             }else{
-                //bookingModal('{"error": "SERVER ERROR"}');
-                error(this.responseText);
+                // bookingModal('{"error": "SERVER ERROR"}');
+                error(this.responseText, 1);
             }
         }
     };
@@ -564,14 +579,14 @@ function processKey(e){
         state.cardNumber+= e.key;
     }
     if(state['cardNumber'].length === 9){
-        //console.log("BID: " + state["card_number"]);
+        // console.log("BID: " + state["card_number"]);
         let startISO = bottomButtons[state.selectedSlots[0]].ISOBeginTime;
         let endISO = bottomButtons[state.selectedSlots[0]].ISOEndTime;
         let roomID = state['reply']['id'];
         window.removeEventListener("keydown", processKey, true);
         let cardNumber = state.cardNumber;
         state.cardNumber = "";
-        //error(startISO + " " + endISO + " " + roomID + " " + cardNumber);
+        // error(startISO + " " + endISO + " " + roomID + " " + cardNumber);
         bookNow(cardNumber, startISO, endISO, roomID);
     }
 }
@@ -580,7 +595,7 @@ function processKey(e){
  * Function to get the data from the server and send it to the populate function
  */
 function makeAjaxCall(){
-    //console.log(state.startup)
+    // console.log(state.startup)
     if(state.startup === false){
         document.getElementById("locationContainer").innerHTML = "Getting New Data...";
         state.startup = true;
@@ -593,13 +608,13 @@ function makeAjaxCall(){
                 //TODO: but apparently someone has decided it's not ADA friendly.
                 //TODO: It has nothing to do with that
                 if(this.status === 500){
-                    error(config.DEAD_SERVER);
+                    error(config.DEAD_SERVER, 1);
                 }
             }else{
                 if(!interactionState.isInteracting()){
                     let JSONReply = JSON.parse(this.responseText);
                     if(JSONReply['error']){
-                        error(JSONReply['error']);
+                        error(JSONReply['error'], 1);
                     }else {
                         cleanup();
                         renderMainScreen(JSONReply);
@@ -618,33 +633,34 @@ function makeAjaxCall(){
     document.getElementById("mainInstructionText").innerHTML = config.MAIN_INSTRUCTION_TEXT;
     document.getElementById("instructionSubtext").innerHTML = config.SUB_INSTRUCTION_TEXT;
     // declare main loop that's always running
+    // this is in a variable in case it ever needs to be addressed.
     let mainLoop = setInterval(function(){
         if(!interactionState.isInteracting()){
             makeAjaxCall();
         }
     }, config['GET_STATE_INTERVAL']);
-    //add event listeners to bottom row of buttons
+    // add event listeners to bottom row of buttons
     for(let i = 0; i < 8; i++){
         document.getElementById("s" + i).addEventListener('click', function(){
             interactionState.interact();
             bottomButton(i);
         });
     }
-    //add listeners to other buttons
-    //=======================================================================================================
-    //RESERVE BUTTON
+    // add listeners to other buttons
+    // =======================================================================================================
+    // RESERVE BUTTON
     document.getElementById("reserveButton").addEventListener('click', function(){
         interactionState.interact();
         makeReservation();
     });
 
-    //CANCEL BOOKING - KEEP SELECTION - RETURN TO MAIN
+    // CANCEL BOOKING - KEEP SELECTION - RETURN TO MAIN
     document.getElementById("cancelConfirmationButton").addEventListener('click', function(){
         interactionState.interactTime(config.SWIPE_TIMEOUT);
         closeModal();
     });
 
-    //OK BOOKING - MOVE TO SWIPE ID SCREEN
+    // OK BOOKING - MOVE TO SWIPE ID SCREEN
     document.getElementById("confirmationButton").addEventListener('click', function(){
         interactionState.interactTime(config.SWIPE_TIMEOUT);
         window.addEventListener("keydown", processKey, true);
@@ -655,7 +671,7 @@ function makeAjaxCall(){
         renderScreen("instructionScreen");
     });
 
-    //ERROR CLOSE
+    // ERROR CLOSE
     document.getElementById("errorClose").addEventListener('click', function(){
         interactionState.endInteraction();
         closeModal();
