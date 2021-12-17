@@ -114,6 +114,7 @@ INITIAL SCREEN
     height: 65px;
     padding-left: 20px;
     padding-top: 15px;
+    padding-bottom: 24px;
 }
 
 #reserveButton{
@@ -162,6 +163,11 @@ INITIAL SCREEN
     padding-top: 2px;
 }
 
+#bookingSlotContainer{
+    display:inline-block;
+    width: 790px;
+}
+
 #bookingSlots{
     height:100px;
     position: relative;
@@ -172,7 +178,7 @@ INITIAL SCREEN
 
 .bookingSlot{
     display: inline-block;
-    width: 97px;
+    width: 95px;
     height: 65px;
     float:left;
     padding-top:25px;
@@ -195,7 +201,7 @@ INITIAL SCREEN
 #rightRibbon{
     display: inline-block;
     width: 10px;
-    height:380px;
+    height: 480px;
     float:left;
 }
 
