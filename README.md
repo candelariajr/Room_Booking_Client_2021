@@ -1,6 +1,6 @@
 # Room Booking Client 2021 Edition: 
 --
-This time we mean it (update for rapid deployment)
+Update for Deployment
 --
 New High Contrast Better JavaScript Version
 
