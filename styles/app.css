@@ -7,6 +7,8 @@ GLOBAL
 *{
     font-family: Arial, Verdana, sans-serif;
     user-select: none;
+    /* Stop flash on-click*/
+    -webkit-tap-highlight-color: transparent;
     /*TODO: Remove this line below for production. The cursor must not be seen*/
     cursor: pointer;
 }
@@ -163,19 +165,70 @@ INITIAL SCREEN
     padding-top: 2px;
 }
 
-#bookingSlotContainer{
-    display:inline-block;
+/* Zoop Stuff */
+/* zoop-container */
+#zoopContainer{
+    /*margin-bottom: 10px;*/
+    overflow: hidden;
+}
+
+/* zoop-content-wrapper */
+#bookingSlotZoopContainer{
     width: 790px;
+    overflow-x: scroll;
+    display: inline-block;
+    float: left;
+    overflow-y: hidden;
+    height: 104px;
 }
 
-#bookingSlots{
-    height:100px;
-    position: relative;
-    display: block;
-    float: right;
-    bottom: 0;
+#bookingSlotZoopContainer::-webkit-scrollbar{
+    /* TODO: Remove for production. This removes scrollbar */
+    display:none;
 }
 
+/* zoop-content */
+#bookingSlotZoopContent{
+    display: inline-block;
+    width: max-content;
+}
+
+/* zoop-section */
+.day-container{
+    display: inline-block;
+}
+
+/* zoop-section-title */
+.day-title{
+    background-color: cyan;
+    color: black;
+    display: flex;
+    padding-right: 4px;
+    padding-left: 8px;
+    justify-content: center;
+}
+
+/* zoop-title-label */
+.day-label{
+    color: black;
+    scroll-snap-stop: always;
+    background-color: inherit;
+    position: sticky;
+    top: 0;
+    left: 9px;
+    right: 8px;
+    padding: 5px 10px 5px 5px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+/* zoop-section-node-list */
+.booking-slot-list{
+    /*padding-top: 15px;*/
+    display: inline-block;
+}
+
+/* zoop-node */
 .bookingSlot{
     display: inline-block;
     width: 95px;
@@ -187,6 +240,8 @@ INITIAL SCREEN
     border-right: 3px solid #444444;
     text-align:center;
 }
+
+/* End Zoop Stuff */
 
 .bookingSlot.available{
     background-color: #111111;
@@ -213,13 +268,6 @@ INITIAL SCREEN
 /**
 ------------------------------------------------------------------
 MODAL GLOBAL
-
-    height: 480px;
-    width: 800px;
-
-
-    480
-
 ------------------------------------------------------------------
  */
 .modal{
@@ -308,7 +356,7 @@ INSTRUCTION SCREEN
 ------------------------------------------------------------------
  */
 #instructionScreen{
-    display:none;
+    display: none;
 }
 
 #mainInstructionText{
