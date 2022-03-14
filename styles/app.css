@@ -116,7 +116,7 @@ INITIAL SCREEN
     height: 65px;
     padding-left: 20px;
     padding-top: 15px;
-    padding-bottom: 22px;
+    padding-bottom: 24px;
 }
 
 #reserveButton{
@@ -203,6 +203,7 @@ INITIAL SCREEN
     background-color: cyan;
     color: black;
     display: flex;
+    height: 27px;
     padding-right: 4px;
     padding-left: 8px;
     justify-content: center;
@@ -235,7 +236,7 @@ INITIAL SCREEN
     width: 95px;
     height: 65px;
     float:left;
-    padding-top:25px;
+    padding-top:6px;
     horiz-align: center;
     font-size: 30px;
     border-right: 3px solid #444444;
