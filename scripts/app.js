@@ -612,7 +612,6 @@ function renderTime(timeContainerElement){
  * System set to 2 treats as LibCal Error indicating bad config or client application error
  */
 function error(message, system){
-    
     renderModal("errorModal");
     document.getElementById("errorMiddle").innerHTML = message;
     let type = system - 1;
@@ -623,13 +622,13 @@ function error(message, system){
 
 /**
  * Function stub - future version will be able to report client system errors to server
- * @param message error message 
+ * @param message error message
  * @param type type of error
  */
 function submitError(message, type){
     // TODO: Implement some server and client-side handling and reporting of these
     if(type === 1){
-        console.log("SYSTEM ERROR: " + message);    
+        console.log("SYSTEM ERROR: " + message);
     }else{
         console.log("LIB-CAL ERROR: " + message);
     }
@@ -779,8 +778,9 @@ function bookNow(bannerID, startISO, endISO, roomID){
                 let reply = JSON.parse(this.responseText);
                 if(reply['booking_id'] !== undefined){
                     resultModal("Booking Successful!");
-                }else if(reply['error'] !== undefined){
-                    resultModal("Error: " + reply['error'])
+                }else if(reply['errors'] !== undefined){
+                    error("Error: " + reply['errors'][0], 2);
+                    
                 }else{
                     error(this.responseText);
                 }
