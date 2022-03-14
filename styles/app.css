@@ -116,7 +116,7 @@ INITIAL SCREEN
     height: 65px;
     padding-left: 20px;
     padding-top: 15px;
-    padding-bottom: 24px;
+    padding-bottom: 22px;
 }
 
 #reserveButton{
@@ -183,8 +183,8 @@ INITIAL SCREEN
 }
 
 #bookingSlotZoopContainer::-webkit-scrollbar{
-    /* TODO: Remove for production. This removes scrollbar */
-    display:none;
+    /* TODO: Restore for production. This removes scrollbar */
+    /* display:none; */
 }
 
 /* zoop-content */
@@ -206,6 +206,7 @@ INITIAL SCREEN
     padding-right: 4px;
     padding-left: 8px;
     justify-content: center;
+    border-bottom: 2px solid black;
 }
 
 /* zoop-title-label */
@@ -244,13 +245,20 @@ INITIAL SCREEN
 /* End Zoop Stuff */
 
 .bookingSlot.available{
+    background-color: #39F57F;
+    color: black;
+    /*
     background-color: #111111;
-    border-bottom: 10px solid #39F57F;
+    Why was this set this way?
+
+    */
+    /* border-bottom: 10px solid #39F57F; */
 }
 
 .bookingSlot.unavailable{
-    background-color: #111111;
-    border-bottom: 10px solid red;
+    background-color: #661616;
+    color: #222;
+    /* border-bottom: 10px solid red; */
 }
 
 #rightRibbon{
