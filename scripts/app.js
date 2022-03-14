@@ -374,11 +374,7 @@ function renderSlots(){
  *      bottomButtons()
  */
 function renderSlots(){
-    if(state.selectedSlots.length !== 0){
-        state.reserveButtonActive = true;
-    }else{
-        state.reserveButtonActive = false;
-    }
+    state.reserveButtonActive = state.selectedSlots.length !== 0;
     if(state.reserveButtonActive === true){
         // if reserve button is active (meaning user has clicked on something that can be booked)
         document.getElementById("reserveButton").className = "reserve-active";
@@ -613,21 +609,30 @@ function renderTime(timeContainerElement){
  * Renders Error modal to screen with message
  * @param message
  * @param system - If set to 1, treats as system error - this is for future error management implementation
+ * System set to 2 treats as LibCal Error indicating bad config or client application error
  */
 function error(message, system){
+    
     renderModal("errorModal");
     document.getElementById("errorMiddle").innerHTML = message;
+    let type = system - 1;
     if(system === 1){
-        submitError(message)
+        submitError(message, type)
     }
 }
 
 /**
  * Function stub - future version will be able to report client system errors to server
- * @param message
+ * @param message error message 
+ * @param type type of error
  */
-function submitError(message){
-    console.log("ERROR: " + message);
+function submitError(message, type){
+    // TODO: Implement some server and client-side handling and reporting of these
+    if(type === 1){
+        console.log("SYSTEM ERROR: " + message);    
+    }else{
+        console.log("LIB-CAL ERROR: " + message);
+    }
 }
 
 
@@ -771,7 +776,15 @@ function bookNow(bannerID, startISO, endISO, roomID){
         if(this.readyState === 4){
             // interact();
             if(this.status === 200){
-                resultModal(this.responseText);
+                let reply = JSON.parse(this.responseText);
+                if(reply['booking_id'] !== undefined){
+                    resultModal("Booking Successful!");
+                }else if(reply['error'] !== undefined){
+                    resultModal("Error: " + reply['error'])
+                }else{
+                    error(this.responseText);
+                }
+
             }else{
                 // bookingModal('{"error": "SERVER ERROR"}');
                 error(this.responseText, 1);
@@ -826,8 +839,8 @@ function makeAjaxCall(){
             }else{
                 if(!interactionState.isInteracting()){
                     let JSONReply = JSON.parse(this.responseText);
-                    if(JSONReply['error']){
-                        error(JSONReply['error'], 1);
+                    if(JSONReply['errors']){
+                        error(JSONReply['errors'][0], 2);
                     }else {
                         cleanup();
                         renderMainScreen(JSONReply);
