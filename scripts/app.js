@@ -162,7 +162,10 @@ const interactionState = {
  */
 let bottomButtons = getBlankButtons();
 
-
+/**
+ * Returns the bottom Buttons model as blank entity
+ * @returns {[{slots: *[], "day-label": string}, {slots: *[], "day-label": string}]}
+ */
 function getBlankButtons(){
     return [{
             'day-label': '',
@@ -175,19 +178,6 @@ function getBlankButtons(){
     ];
 }
 
-/*
-for(let i = 0; i < globals.SLOT_COUNT; i++){
-    bottomButtons.push({
-        time: null,
-        endTime : null,
-        ISOBeginTime : null,
-        ISOEndTime: null,
-        availability: null,
-        selected: false,
-        display: false}
-    );
-}
-*/
 /*
 * -------------------------------------------------------------------------------------------
 * END STARTUP SEQUENCE
@@ -210,51 +200,6 @@ function getDisplayTimesToButtonObject(){
         error(state['reply']['error'], 1)
         return;
     }
-    /*
-    // There are at least 8 slots here
-    if(state['reply']['days'][0]['time-slots'].length >= bottomButtons.length){
-        for(let i = 0; i < bottomButtons.length; i++) {
-            setSlotData(0, i, i)
-        }
-    }else{
-        // pick up the last slots of the current day and the ones from the next day for a total of 8
-        let firstDaySlotCount = state['reply']['days'][0]['time-slots'].length;
-        // let secondDaySlotCount = bottomButtons.length - firstDaySlotCount;
-        let buttonSlotPosition = 0;
-        //TODO: Audit this as there is probably an off by 1 error in here somewhere.
-        for(let i = 0; i < firstDaySlotCount; i++){
-            setSlotData(0, i, i);
-            buttonSlotPosition++;
-        }
-        //for(let i = 0; i < secondDaySlotCount; i++){
-        //     setSlotData(1, i, buttonSlotPosition)
-        //    buttonSlotPosition++;
-        //}
-    }
-    // add a blurb to display next available time
-    // TODO: This is unorganized
-    if(!state['reply']['available']){
-        let nextAvailTime = null;
-        for(let i = 0; i < bottomButtons.length; i++){
-            if(!nextAvailTime){
-                if(bottomButtons[i]['availability'] === 'available'){
-                    nextAvailTime = bottomButtons[i].time;
-                }
-            }
-        }
-        if(nextAvailTime){
-            let templatePartials = config.NEXT_AVAILABLE.split("#");
-            document.getElementById("statusContainer").innerHTML = (templatePartials[0] +
-                " " +
-                nextAvailTime +
-                templatePartials[1]);
-        }
-    }
-    // If app is frozen for dev/testing, this makes a fake booking slot available
-    if(globals.DISABLE_TIMEOUT){
-        bottomButtons[2]['availability'] = 'available';
-    }
-    */
     console.log(state['reply']);
     bottomButtons = getBlankButtons();
     for(let days = 0; days < state['reply']['days'].length; days++){
@@ -287,89 +232,6 @@ function getDayLabel(day){
     return day['day'] + ", " + getMonth(parseInt(day['month']) - 1);
 }
 
-
-
-/**
- * Support function for getDisplayTimesToButtonObject()
- * Called by loops to tell which server data goes into the global slots properties.
- * @param serverDataDay
- * The given day within the server data object (it gets today and tomorrow for late night
- * transition between days)
- * @param serverSlotIndex
- * Index of the server day to put into the given slot index
- * @param slotArrayIndex
- * The slot index the server data goes into
- */
-/*
-function setSlotData(serverDataDay, serverSlotIndex, slotArrayIndex){
-    let slot = state['reply']['days'][serverDataDay]['time-slots'][serverSlotIndex];
-    // Remove AM/PM at end
-    let startTime = slot['from-display'].split(" ")[0];
-    let endTime = slot['to-display'].split(" ")[0];
-    // Remove leading zeroes
-    if(startTime.charAt(0) === '0'){
-        startTime = startTime.substring(1, startTime.length)
-    }
-    if(endTime.charAt(0) === '0'){
-        endTime = endTime.substring(1, endTime.length)
-    }
-    bottomButtons[slotArrayIndex]['time'] = startTime
-    bottomButtons[slotArrayIndex]['endTime'] = endTime;
-    bottomButtons[slotArrayIndex]['ISOBeginTime'] = slot['from-iso'];
-    bottomButtons[slotArrayIndex]['ISOEndTime'] = slot['to-iso'];
-    bottomButtons[slotArrayIndex]['availability'] = slot['status'];
-}
-*/
-
-/**
- * Render the slots based on the contents of the bottomButton objects.
- */
-/*
-function renderSlots(){
-    // cleanup function called
-    // cleanup();
-    state.anySlotAvailable = false;
-    for(let i= 0; i < 8; i++) {
-        let element = document.getElementById("s" + i);
-        if (bottomButtons[i]['availability'] &&
-            // Redundant, but error checking kept flagging this one
-            typeof bottomButtons[i]['availability'] === 'string' &&
-            bottomButtons[i]['availability'].toString() === 'available') {
-            state.anySlotAvailable = true;
-            element.innerHTML = bottomButtons[i]['time'];
-            element.className = "bookingSlot available";
-        } else {
-            element.innerHTML = bottomButtons[i]['time'];
-            element.className = "bookingSlot unavailable";
-        }
-        if (bottomButtons[i]['selected']) {
-            state.anySlotAvailable = true;
-            element.className = "bookingSlot selected";
-        }
-    }
-    // TODO: Clean up some of this logic
-    if(state.anySlotAvailable === false){
-        // No Slots Available
-        document.getElementById("firstInstruction").innerHTML = "";
-    }else if(state['reply']['days']['null'] === false){
-        // if server didn't send null for dates array
-        document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
-    }else{
-        // if server did send null for dates array
-    }
-    if(state.reserveButtonActive === true){
-        // if reserve button is active (meaning user has clicked on something that can be booked)
-        document.getElementById("reserveButton").className = "reserve-active";
-        document.getElementById("firstInstruction").innerHTML = config.TAP_RESERVE;
-    }else{
-        // reset the text if user cancels
-        document.getElementById("reserveButton").className="reserve-inactive";
-        if(state.anySlotAvailable !== false){
-            document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
-        }
-    }
-}*/
-
 /**
  * Re/renders slots to the screen. Called when new changes are made to model or new data is generated
  * Called by:
@@ -379,6 +241,7 @@ function renderSlots(){
  */
 function renderSlots(){
     state.reserveButtonActive = state.selectedSlots.length !== 0;
+    // check to see if someone is currently selecting slots
     if(state.reserveButtonActive === true){
         // if reserve button is active (meaning user has clicked on something that can be booked)
         document.getElementById("reserveButton").className = "reserve-active";
@@ -392,8 +255,7 @@ function renderSlots(){
             document.getElementById("firstInstruction").innerHTML = config.FIRST_INSTRUCTION_TEXT;
         }
     }
-    let nextAvailble = false;
-    //document.getElementById("reserveButton").className = "reserve-active";
+    let nextAvailable = false;
     for(let i = 0; i < bottomButtons.length; i++){
         if(i === 0){
             document.getElementById("dayOne").innerHTML = bottomButtons[i]['day-label'];
@@ -414,13 +276,15 @@ function renderSlots(){
                     fromDisplay = fromDisplay.substring(1, fromDisplay.length);
                 }
                 element.innerHTML = fromDisplay;
+                // unavailable slot display
                 if(slot['status'] === 'unavailable') {
                     element.className = "bookingSlot unavailable";
                 }else if(slot['status'] === 'available') {
-                    if(!nextAvailble && state.reply['available'] === false){
-                        nextAvailble = slot['from-display'];
+                    // while iterating through the slots, find the next slot available
+                    if(!nextAvailable && state.reply['available'] === false){
+                        nextAvailable = slot['from-display'];
                         document.getElementById("statusContainer").innerHTML =
-                            ("This room isn't available until " + nextAvailble + ".");
+                            ("This room isn't available until " + nextAvailable + ".");
                     }
                     element.className = 'bookingSlot available';
                 }
@@ -458,18 +322,6 @@ function cleanup(){
         selectedSlots: []
     };
     // clean up slots
-    /*
-    for(let i = 0; i < bottomButtons.length; i++){
-        bottomButtons[i] = {
-            time: null,
-            endTime : null,
-            ISOBeginTime : null,
-            ISOEndTime: null,
-            availability: null,
-            pageRight: false,
-            selected: false
-        }
-    }*/
     bottomButtons = getBlankButtons();
 }
 
@@ -501,6 +353,7 @@ function bottomButton(day, slot){
 }
 
 /**
+ * Support function for the bottom Buttons' event handlers
  * Returns true if slot is able to change to 'selected', false if not
  * Modifies slot selection array for generation of ISO time range for booking
  * @param day
@@ -549,9 +402,9 @@ function selectSlot(day, slot){
             console.log(bottomButtons);
             return false;
         }
-        // drop FROM current to END of array if NOT and END of array
         /*
-        //THIS IS COMPLETELY BROKEN!!
+        // TODO: THIS IS COMPLETELY BROKEN!!
+        // drop FROM current to END of array if NOT and END of array
         if(state.selectedSlots.indexOf(parseInt(bottomButtons[day - 1 ]['slots'][slot - 1]['id'])) > 0){
             let index = state.selectedSlots.indexOf(parseInt(bottomButtons[day - 1 ]['slots'][slot - 1]['id']));
             for(let g = index; g < state.selectedSlots.length; g++){
@@ -737,7 +590,12 @@ function renderMainScreen(serverReply){
     state['reply'] = serverReply;
     // render the big display colors (Color Bar and Ribbon)
     // render the text (avail, room number)
-    document.getElementById("locationContainer").innerHTML = serverReply["room-display-text"]
+    // if the server doesn't reply, don't write undefined to the screen.
+    if(serverReply["room-display-text"]){
+        document.getElementById("locationContainer").innerHTML = serverReply["room-display-text"]
+    }else{
+        document.getElementById("locationContainer").innerHTML = "";
+    }
     if(serverReply["available"]){
         // Text
         document.getElementById("statusContainer").innerHTML = "Available"
@@ -762,6 +620,7 @@ function renderMainScreen(serverReply){
 }
 
 /**
+ * Event handler called after detecting ID card swipe
  * Makes the call to the server make LibCal booking
  * @param bannerID
  * Patrons 9-digit ID
