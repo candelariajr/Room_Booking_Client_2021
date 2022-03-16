@@ -24,6 +24,7 @@ const config = {
     DEAD_SERVER: "Server is Down",
     MAIN_INSTRUCTION_TEXT: "Swipe App Card",
     SUB_INSTRUCTION_TEXT: "Magnetic Stripe Faces Away From You",
+    MAX_SLOTS_SELECTED: "You have selected the maximum number of slots for a single booking.",
     //This is the maximum time to wait for a response from the API call before resetting
     //This doesn't benefit anything, but prevents the app from locking up if the server is slow enough
     // to time out the API request
