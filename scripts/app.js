@@ -206,6 +206,10 @@ function getDisplayTimesToButtonObject(){
         error(config.UNABLE_TO_LOAD_DATA, 1);
         return;
     }
+    if(state['reply']['error']){
+        error(state['reply']['error'], 1)
+        return;
+    }
     /*
     // There are at least 8 slots here
     if(state['reply']['days'][0]['time-slots'].length >= bottomButtons.length){
@@ -780,7 +784,7 @@ function bookNow(bannerID, startISO, endISO, roomID){
                     resultModal("Booking Successful!");
                 }else if(reply['errors'] !== undefined){
                     error("Error: " + reply['errors'][0], 2);
-                    
+
                 }else{
                     error(this.responseText);
                 }
