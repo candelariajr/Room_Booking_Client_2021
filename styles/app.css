@@ -72,13 +72,14 @@ INITIAL SCREEN
 
 #mainContainer{
     width: 790px;
-    height: 380px;
+    height: 376px;
     display: inline-block;
     float: left;
 }
 
 #mainTopSection{
-    height: 250px;
+    height: 376px;
+    width: 800px;
     background-color: #444444;
 }
 
@@ -93,7 +94,7 @@ INITIAL SCREEN
     display: inline-block;
     float:left;
     width:700px;
-    height:220px;
+    height:346px;
     padding-left:40px;
     padding-top:30px;
 }
@@ -110,13 +111,15 @@ INITIAL SCREEN
 
 #statusContainer{
     font-size: 35px;
+    height: 55px;
 }
 
 #reserveContainer{
     height: 65px;
     padding-left: 20px;
-    padding-top: 15px;
+    padding-top: 39px;
     padding-bottom: 24px;
+    width: 636px;
 }
 
 #reserveButton{
@@ -129,7 +132,8 @@ INITIAL SCREEN
     padding-top: 15px;
     padding-bottom: 15px;
     display: inline-block;
-    margin-left: 100px;
+    margin-left: 30px;
+    float:left;
 }
 
 #reserveButton.reserve-active{
@@ -152,8 +156,8 @@ INITIAL SCREEN
 #firstInstruction{
     font-weight:bold;
     font-size: 28px;
-    float: right;
-    padding-right: 50px;
+    float: left;
+    padding-left: 20px;
 }
 
 #nextAvailableContainer{
@@ -170,11 +174,12 @@ INITIAL SCREEN
 #zoopContainer{
     /*margin-bottom: 10px;*/
     overflow: hidden;
+    width: 800px;
 }
 
 /* zoop-content-wrapper */
 #bookingSlotZoopContainer{
-    width: 790px;
+    width: 800px;
     overflow-x: scroll;
     display: inline-block;
     float: left;
@@ -265,7 +270,7 @@ INITIAL SCREEN
 #rightRibbon{
     display: inline-block;
     width: 10px;
-    height: 480px;
+    height: 376px;
     float:left;
 }
 
