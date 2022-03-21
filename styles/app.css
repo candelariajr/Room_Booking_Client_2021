@@ -72,13 +72,13 @@ INITIAL SCREEN
 
 #mainContainer{
     width: 790px;
-    height: 376px;
+    height: 366px;
     display: inline-block;
     float: left;
 }
 
 #mainTopSection{
-    height: 376px;
+    height: 366px;
     width: 800px;
     background-color: #444444;
 }
@@ -161,6 +161,7 @@ INITIAL SCREEN
 }
 
 #nextAvailableContainer{
+    display:none;
     color: turquoise;
     font-weight:bold;
     padding-left:30px;
@@ -175,6 +176,7 @@ INITIAL SCREEN
     /*margin-bottom: 10px;*/
     overflow: hidden;
     width: 800px;
+    height: 114px;
 }
 
 /* zoop-content-wrapper */
@@ -184,13 +186,29 @@ INITIAL SCREEN
     display: inline-block;
     float: left;
     overflow-y: hidden;
-    height: 104px;
+    height: 114px;
 }
 
 #bookingSlotZoopContainer::-webkit-scrollbar{
+    background-color: black;
     /* TODO: Restore for production. This removes scrollbar */
     /* display:none; */
 }
+
+
+::-webkit-scrollbar-track{
+    background-color: black;
+}
+
+::-webkit-scrollbar-track{
+    background-color: black;
+}
+
+::-webkit-scrollbar-thumb{
+    background-color: aqua;
+    border-radius: 10px;
+}
+
 
 /* zoop-content */
 #bookingSlotZoopContent{
@@ -245,7 +263,8 @@ INITIAL SCREEN
     width: 95px;
     height: 65px;
     float:left;
-    padding-top:6px;
+    padding-top:3px;
+    padding-bottom:3px;
     horiz-align: center;
     font-size: 30px;
     border-right: 3px solid #444444;
@@ -274,7 +293,7 @@ INITIAL SCREEN
 #rightRibbon{
     display: inline-block;
     width: 10px;
-    height: 376px;
+    height: 100%;
     float:left;
 }
 
