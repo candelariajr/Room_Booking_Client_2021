@@ -28,8 +28,8 @@ body{
 }
 
 .screen{
-    height: 480px;
-    width: 800px;
+    height: 1080px;
+    width: 1920px;
 }
 
 /*
@@ -71,20 +71,20 @@ INITIAL SCREEN
 #appContainer{}
 
 #mainContainer{
-    width: 790px;
-    height: 366px;
+    width: 1896px;
+    height: 823px;
     display: inline-block;
     float: left;
 }
 
 #mainTopSection{
-    height: 366px;
-    width: 800px;
+    height: 823px;
+    width: 1920px;
     background-color: #444444;
 }
 
 #leftColorBar{
-    width: 50px;
+    width: 120px;
     height: 100%;
     display: inline-block;
     float:left;
@@ -93,46 +93,46 @@ INITIAL SCREEN
 #rightInfoScreen{
     display: inline-block;
     float:left;
-    width:700px;
-    height:346px;
-    padding-left:40px;
-    padding-top:30px;
+    width:1680px;
+    height:778px;
+    padding-left:96px;
+    padding-top:67px;
 }
 
 #timeContainer{
-    font-size: 25px;
-    padding-bottom: 20px;
+    font-size: 56px;
+    padding-bottom: 45px;
 }
 
 #locationContainer{
-    font-size: 70px;
-    padding-bottom: 15px;
+    font-size: 157px;
+    padding-bottom: 33px;
 }
 
 #statusContainer{
-    font-size: 35px;
-    height: 55px;
+    font-size: 78px;
+    height: 123px;
 }
 
 #reserveContainer{
-    height: 65px;
-    padding-left: 20px;
-    padding-top: 39px;
-    padding-bottom: 24px;
-    width: 636px;
+    height: 146px;
+    padding-left: 48px;
+    padding-top: 87px;
+    padding-bottom: 54px;
+    width: 1526px;
 }
 
 #reserveButton{
-    font-size: 20px;
+    font-size: 45px;
     background: #222;
-    width: 200px;
+    width: 480px;
     text-align: center;
     border-radius: 4px;
     border: 2px solid white;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-top: 33px;
+    padding-bottom: 33px;
     display: inline-block;
-    margin-left: 30px;
+    margin-left: 72px;
     float:left;
 }
 
@@ -147,27 +147,27 @@ INITIAL SCREEN
 }
 
 #currentDateContainer{
-    height: 30px;
-    padding-left:30px;
+    height: 67px;
+    padding-left:72px;
     display: inline-block;
     width: 50%;
 }
 
 #firstInstruction{
     font-weight:bold;
-    font-size: 28px;
+    font-size: 45px;
     float: left;
-    padding-left: 20px;
+    padding-left: 48px;
 }
 
 #nextAvailableContainer{
     display:none;
     color: turquoise;
     font-weight:bold;
-    padding-left:30px;
-    height: 20px;
+    padding-left:72px;
+    height: 45px;
     background: #222222;
-    padding-top: 2px;
+    padding-top: 4px;
 }
 
 /* Zoop Stuff */
@@ -175,18 +175,18 @@ INITIAL SCREEN
 #zoopContainer{
     /*margin-bottom: 10px;*/
     overflow: hidden;
-    width: 800px;
-    height: 114px;
+    width: 1920px;
+    height: 256px;
 }
 
 /* zoop-content-wrapper */
 #bookingSlotZoopContainer{
-    width: 800px;
+    width: 1920px;
     overflow-x: scroll;
     display: inline-block;
     float: left;
     overflow-y: hidden;
-    height: 114px;
+    height: 256px;
 }
 
 #bookingSlotZoopContainer::-webkit-scrollbar{
@@ -217,7 +217,7 @@ INITIAL SCREEN
 }
 
 #bookingSlotZoopContent>:first-child {
-    margin-right: 20px;
+    margin-right: 48px;
 }
 
 /* zoop-section */
@@ -230,11 +230,11 @@ INITIAL SCREEN
     background-color: cyan;
     color: black;
     display: flex;
-    height: 27px;
-    padding-right: 4px;
-    padding-left: 8px;
+    height: 60px;
+    padding-right: 9px;
+    padding-left: 19px;
     justify-content: center;
-    border-bottom: 2px solid black;
+    border-bottom: 4px solid black;
 }
 
 /* zoop-title-label */
@@ -244,11 +244,11 @@ INITIAL SCREEN
     background-color: inherit;
     position: sticky;
     top: 0;
-    left: 9px;
-    right: 8px;
-    padding: 5px 10px 5px 5px;
+    left: 21px;
+    right: 19px;
+    padding: 11px 24px 11px 12px;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 33px;
 }
 
 /* zoop-section-node-list */
@@ -260,13 +260,13 @@ INITIAL SCREEN
 /* zoop-node */
 .bookingSlot{
     display: inline-block;
-    width: 95px;
-    height: 65px;
+    width: 228px;
+    height: 146px;
     float:left;
-    padding-top:3px;
-    padding-bottom:3px;
+    padding-top:6px;
+    padding-bottom:6px;
     horiz-align: center;
-    font-size: 30px;
+    font-size: 67px;
     border-right: 3px solid #444444;
     text-align:center;
 }
@@ -285,14 +285,14 @@ INITIAL SCREEN
 }
 
 .bookingSlot.unavailable{
-    background-color: #661616;
+    background-color: red;
     color: #222;
     /* border-bottom: 10px solid red; */
 }
 
 #rightRibbon{
     display: inline-block;
-    width: 10px;
+    width: 24px;
     height: 100%;
     float:left;
 }
@@ -310,45 +310,45 @@ MODAL GLOBAL
 .modal{
     border: 4px solid #39F57F;
     position: absolute;
-    top: 50px;
-    left: 150px;
-    width: 500px;
-    height: 380px;
+    top: 112px;
+    left: 360px;
+    width: 1200px;
+    height: 855px;
     background-color: #444444;
 }
 
 .modal-top{
     text-align:center;
     font-weight: bold;
-    height: 35px;
-    font-size: 25px;
-    padding-top: 8px;
+    height: 78px;
+    font-size: 56px;
+    padding-top: 18px;
     background-color: black;
 }
 
 .modal-content{
-    font-size: 32px;
-    padding: 30px;
-    height: 207px;
+    font-size: 72px;
+    padding: 65px;
+    height: 465px;
 }
 
 .modal-bottom{
     position: absolute;
     bottom: 0;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-top: 10px;
-    width: 440px;
-    height: 60px;
+    padding-left: 72px;
+    padding-right: 72px;
+    padding-top: 22px;
+    width: 1056px;
+    height: 135px;
 }
 
 .modal-button{
     text-align: center;
     display: inline-block;
-    padding: 10px 10px 5px 10px;
+    padding: 22px 24px 22px 24px;
     font-weight: bold;
-    font-size: 25px;
-    height: 35px;
+    font-size: 56px;
+    height: 78px;
     background-color: blue;
 }
 
@@ -397,19 +397,19 @@ INSTRUCTION SCREEN
 }
 
 #mainInstructionText{
-    padding-top: 40px;
+    padding-top: 90px;
     text-align: center;
-    font-size: 60px;
+    font-size: 135px;
 }
 
 #instructionSubtext{
-    padding-top: 85px;
+    padding-top: 191px;
     text-align: center;
 }
 
 #instructionButtons{
     position: relative;
-    top: 159px;
-    padding: 30px;
+    top: 357px;
+    padding: 70px;
 }
 
